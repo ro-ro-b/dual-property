@@ -57,25 +57,43 @@ export async function GET(req: NextRequest) {
     const objects = data?.items || data?.objects || data?.data || (Array.isArray(data) ? data : []);
 
     // Map gateway objects to property format
-    const properties = objects.map((obj: any) => ({
-      id: obj.id || obj._id,
-      name: obj.custom?.name || obj.metadata?.name || obj.data?.name || `Property ${(obj.id || '').slice(-6)}`,
-      description: obj.custom?.description || obj.metadata?.description || obj.data?.description || '',
-      status: 'active',
-      propertyType: obj.custom?.propertyType || obj.data?.propertyType || 'residential',
-      location: {
-        address: obj.custom?.address || obj.data?.address || '',
-        city: obj.custom?.city || obj.data?.city || '',
-        country: obj.custom?.country || obj.data?.country || '',
-      },
-      investment: obj.custom?.investment || obj.data?.investment || {},
-      financials: obj.custom?.financials || obj.data?.financials || {},
-      templateId: obj.template_id,
-      ownerId: obj.owner_id || obj.owner,
-      blockchainTxHash: obj.integrity_hash,
-      createdAt: obj.created_at || obj.createdAt,
-      updatedAt: obj.updated_at || obj.updatedAt,
-    }));
+    // Note: custom fields may be flat (tokenPricePerShare) or nested (investment.tokenPricePerShare)
+    const properties = objects.map((obj: any) => {
+      const c = obj.custom || {};
+      const inv = c.investment || {};
+      const fin = c.financials || {};
+      return {
+        id: obj.id || obj._id,
+        name: c.name || obj.metadata?.name || `Property ${(obj.id || '').slice(-6)}`,
+        description: c.description || obj.metadata?.description || '',
+        status: 'active',
+        propertyType: c.propertyType || 'residential',
+        location: {
+          address: c.address || '',
+          city: c.city || '',
+          country: c.country || '',
+        },
+        investment: {
+          totalPropertyValue: inv.totalPropertyValue || c.totalPropertyValue || 0,
+          tokenPricePerShare: inv.tokenPricePerShare || c.tokenPricePerShare || 0,
+          totalTokens: inv.totalTokens || c.totalTokens || 0,
+          annualYield: inv.annualYield || c.annualYield || 0,
+          minimumInvestment: inv.minimumInvestment || c.minimumInvestment || 0,
+        },
+        financials: {
+          monthlyRentalIncome: fin.monthlyRentalIncome || c.monthlyRentalIncome || 0,
+          annualExpenses: fin.annualExpenses || c.annualExpenses || 0,
+          netOperatingIncome: fin.netOperatingIncome || c.netOperatingIncome || 0,
+          capRate: fin.capRate || c.capRate || 0,
+          projectedAppreciation: fin.projectedAppreciation || c.projectedAppreciation || 0,
+        },
+        templateId: obj.template_id,
+        ownerId: obj.owner_id || obj.owner,
+        blockchainTxHash: obj.integrity_hash,
+        createdAt: obj.created_at || obj.createdAt,
+        updatedAt: obj.updated_at || obj.updatedAt,
+      };
+    });
 
     return NextResponse.json({ properties });
   } catch (err: any) {
