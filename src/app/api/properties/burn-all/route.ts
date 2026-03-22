@@ -25,21 +25,80 @@ export async function POST(req: NextRequest) {
   const results: any[] = [];
 
   for (const id of ids) {
+    // Try multiple burn approaches
+    let success = false;
+    let lastError = '';
+
+    // Approach 1: /actions/execute with objectId + actionTypeId
     try {
-      const res = await fetch(`${BASE}/ebus/execute`, {
+      const res = await fetch(`${BASE}/actions/execute`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${jwtToken}`,
         },
-        body: JSON.stringify({ action: { burn: { ids: [id] } } }),
+        body: JSON.stringify({ objectId: id, actionTypeId: 'burn' }),
         cache: 'no-store',
       });
       const data = await res.json();
-      results.push({ id, status: res.status, success: res.ok, data });
+      if (res.ok) {
+        results.push({ id, approach: 'actions/execute', success: true, data });
+        success = true;
+        continue;
+      }
+      lastError = `actions/execute: ${res.status} ${data.message || JSON.stringify(data)}`;
     } catch (err: any) {
-      results.push({ id, success: false, error: err.message });
+      lastError = `actions/execute: ${err.message}`;
     }
+
+    // Approach 2: /ebus/execute with action.burn.object_ids
+    if (!success) {
+      try {
+        const res = await fetch(`${BASE}/ebus/execute`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${jwtToken}`,
+          },
+          body: JSON.stringify({ action: { burn: { object_ids: [id] } } }),
+          cache: 'no-store',
+        });
+        const data = await res.json();
+        if (res.ok) {
+          results.push({ id, approach: 'ebus/object_ids', success: true, data });
+          success = true;
+          continue;
+        }
+        lastError += ` | ebus/object_ids: ${res.status} ${data.message || JSON.stringify(data)}`;
+      } catch (err: any) {
+        lastError += ` | ebus/object_ids: ${err.message}`;
+      }
+    }
+
+    // Approach 3: DELETE /objects/{id}
+    if (!success) {
+      try {
+        const res = await fetch(`${BASE}/objects/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${jwtToken}`,
+          },
+          cache: 'no-store',
+        });
+        const text = await res.text();
+        if (res.ok) {
+          results.push({ id, approach: 'DELETE /objects', success: true, data: text });
+          success = true;
+          continue;
+        }
+        lastError += ` | DELETE: ${res.status} ${text.substring(0, 100)}`;
+      } catch (err: any) {
+        lastError += ` | DELETE: ${err.message}`;
+      }
+    }
+
+    results.push({ id, success: false, errors: lastError });
   }
 
   return NextResponse.json({ results });
