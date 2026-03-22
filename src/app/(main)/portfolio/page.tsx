@@ -111,6 +111,7 @@ function PortfolioContent() {
   const avgYield = holdings.length > 0 ? holdings.reduce((sum, h) => sum + h.annualYield, 0) / holdings.length : 0;
 
   const handleClaimYield = async (propertyId: string) => {
+    console.log('[ClaimYield] clicked for', propertyId);
     setClaimingId(propertyId);
     try {
       const response = await fetch(`/api/properties/${propertyId}/claim-yield`, {
@@ -172,7 +173,8 @@ function PortfolioContent() {
     <div className="min-h-screen bg-[#0a0e1a]">
       {/* Toast notification */}
       {toastMessage && (
-        <div className="fixed top-4 right-4 z-50 max-w-md animate-[fadeIn_0.3s_ease-out]">
+        <div className="fixed top-4 right-4 z-[9999] max-w-md" style={{ animation: 'fadeInToast 0.3s ease-out' }}>
+          <style>{`@keyframes fadeInToast { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
           <div className={`px-5 py-3 rounded-xl border shadow-2xl backdrop-blur-sm ${
             toastMessage.includes('failed') || toastMessage.includes('Error')
               ? 'bg-red-900/90 border-red-500/50 text-red-100'
