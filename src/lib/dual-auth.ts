@@ -156,7 +156,8 @@ async function refreshJwt(): Promise<boolean> {
 
 /**
  * Get an authenticated DualClient with a valid org-scoped JWT.
- * Returns null if no JWT is cached (user needs to login via OTP first).
+ * Falls back to reading JWT from cookies (for serverless environments like Vercel).
+ * Returns null if no JWT is available.
  */
 export async function getAuthenticatedClient(): Promise<DualClient | null> {
   // Try refresh if expired
@@ -164,7 +165,35 @@ export async function getAuthenticatedClient(): Promise<DualClient | null> {
     const refreshed = await refreshJwt();
     if (!refreshed) {
       _tokenCache = null;
-      return null;
+    }
+  }
+
+  // If no in-memory cache, try reading from cookies (serverless fallback)
+  if (!_tokenCache) {
+    try {
+      const { cookies } = await import('next/headers');
+      const cookieStore = await cookies();
+      const jwtCookie = cookieStore.get('dual_jwt');
+      const refreshCookie = cookieStore.get('dual_refresh');
+
+      if (jwtCookie?.value) {
+        _tokenCache = {
+          accessToken: jwtCookie.value,
+          refreshToken: refreshCookie?.value || '',
+          expiresAt: parseJwtExp(jwtCookie.value),
+        };
+
+        // If cookie JWT is expired, try refresh
+        if (!isTokenValid()) {
+          const refreshed = await refreshJwt();
+          if (!refreshed) {
+            _tokenCache = null;
+            return null;
+          }
+        }
+      }
+    } catch {
+      // cookies() not available outside request context — ignore
     }
   }
 
