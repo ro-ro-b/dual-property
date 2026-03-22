@@ -69,18 +69,11 @@ export async function GET(
   { params }: { params: { propertyId: string } }
 ) {
   try {
-    const BASE = process.env.NEXT_PUBLIC_DUAL_API_URL || 'https://gateway-48587430648.europe-west6.run.app';
     const jwtToken = await getOrgScopedToken(req);
 
     if (jwtToken) {
-      // Direct HTTP call to DUAL gateway
-      const res = await fetch(`${BASE}/objects/${params.propertyId}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${jwtToken}`,
-        },
-        cache: 'no-store',
-      });
+      // Direct HTTP call to DUAL gateway (dualFetch handles JWT vs API key)
+      const res = await dualFetch(`/objects/${params.propertyId}`, jwtToken);
 
       if (res.ok) {
         const obj = await res.json();
