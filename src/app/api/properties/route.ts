@@ -16,13 +16,30 @@ export async function GET(req: NextRequest) {
     const templateId = process.env.DUAL_PROPERTIES_TEMPLATE_ID || FALLBACK_TEMPLATE_ID;
 
     // Try to get JWT from cookie for authenticated listing
-    const jwtCookie = req.cookies.get('dual_jwt')?.value;
-    const authHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (jwtCookie) {
-      authHeaders['Authorization'] = `Bearer ${jwtCookie}`;
-    } else if (process.env.DUAL_API_TOKEN) {
-      authHeaders['Authorization'] = `Bearer ${process.env.DUAL_API_TOKEN}`;
+    let jwtToken = req.cookies.get('dual_jwt')?.value || process.env.DUAL_API_TOKEN || '';
+    const orgId = process.env.DUAL_ORG_ID || FALLBACK_ORG_ID;
+
+    // If we have a JWT, check if it's system-scoped and needs org switch
+    if (jwtToken) {
+      try {
+        const payload = JSON.parse(Buffer.from(jwtToken.split('.')[1], 'base64').toString());
+        if (payload.fqdn === 'system' && orgId) {
+          // System-scoped JWT — switch to org context
+          const switchRes = await fetch(`${BASE}/organizations/switch`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${jwtToken}` },
+            body: JSON.stringify({ id: orgId }),
+          });
+          if (switchRes.ok) {
+            const switchData = await switchRes.json();
+            jwtToken = switchData.access_token || jwtToken;
+          }
+        }
+      } catch { /* JWT parse error — use as-is */ }
     }
+
+    const authHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (jwtToken) authHeaders['Authorization'] = `Bearer ${jwtToken}`;
 
     // Direct HTTP call to DUAL gateway — SDK client often lacks org context on serverless
     const url = `${BASE}/objects?template_id=${templateId}&limit=100`;
