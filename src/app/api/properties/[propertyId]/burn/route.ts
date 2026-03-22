@@ -1,21 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
-import { dualFetch } from "@/lib/get-org-token";
+import { getOrgToken, dualFetch } from "@/lib/get-org-token";
 
 export const dynamic = "force-dynamic";
 
 // DELETE /api/properties/[propertyId]/burn — Burn (delete) a property token
+// Requires the owner's JWT (from session cookie) — API key alone can't burn
 export async function DELETE(
   req: NextRequest,
   { params }: { params: { propertyId: string } }
 ) {
-  const apiKey = process.env.DUAL_API_TOKEN || process.env.DUAL_API_KEY || '';
-  if (!apiKey) {
-    return NextResponse.json({ error: 'No API token configured' }, { status: 500 });
+  // Get the user's org-scoped JWT from cookie/header
+  const jwtToken = await getOrgToken(req);
+  if (!jwtToken) {
+    return NextResponse.json({ error: 'Not authenticated. Login via OTP first.' }, { status: 401 });
   }
 
+  const BASE = process.env.NEXT_PUBLIC_DUAL_API_URL || 'https://gateway-48587430648.europe-west6.run.app';
+
   try {
-    const res = await dualFetch('/ebus/execute', apiKey, {
+    // Burn requires Bearer JWT from the token owner — send directly
+    const res = await fetch(`${BASE}/ebus/execute`, {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${jwtToken}`,
+      },
       body: JSON.stringify({
         action: {
           burn: {
@@ -23,6 +32,7 @@ export async function DELETE(
           },
         },
       }),
+      cache: 'no-store',
     });
 
     const data = await res.json();
