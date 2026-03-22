@@ -46,27 +46,29 @@ export default function PropertiesPage() {
       .then((data) => {
         const props = data.properties || [];
         const mapped: Property[] = props.map((p: any, idx: number) => {
+          // API returns: p.name, p.propertyType, p.location.city, p.investment.*, p.imageUrl
+          const loc = p.location || {};
+          const inv = p.investment || {};
+          const rawType = p.propertyType || 'residential';
           const propType =
-            p.propertyData?.propertyType === 'mixed-use'
+            rawType === 'mixed-use'
               ? 'Mixed-Use'
-              : p.propertyData?.propertyType
-                ? p.propertyData.propertyType.charAt(0).toUpperCase() + p.propertyData.propertyType.slice(1)
-                : 'Residential';
+              : rawType.charAt(0).toUpperCase() + rawType.slice(1);
           return {
             id: p.id,
-            name: p.propertyData?.name || 'Property Token',
-            location: p.propertyData?.city ? `${p.propertyData.city}, ${p.propertyData.country}` : 'DUAL Network',
+            name: p.name || 'Untitled Property',
+            location: loc.city ? `${loc.city}, ${loc.country || ''}` : 'DUAL Network',
             type: propType as any,
-            totalValue: p.propertyData?.totalValue || 0,
-            tokenPrice: p.propertyData?.tokenPrice || 0,
-            yieldPercent: p.propertyData?.annualYield || 0,
-            fundedPercent: p.propertyData?.totalTokens
-              ? Math.round((p.propertyData.tokensSold / p.propertyData.totalTokens) * 100)
+            totalValue: inv.totalPropertyValue || 0,
+            tokenPrice: inv.tokenPricePerShare || 0,
+            yieldPercent: inv.annualYield || 0,
+            fundedPercent: inv.totalTokens
+              ? Math.round(((inv.tokensSold || 0) / inv.totalTokens) * 100)
               : 0,
-            sqft: p.propertyData?.totalSqft || 0,
+            sqft: p.totalSqft || 0,
             imageGradient: GRADIENTS[idx % GRADIENTS.length],
-            imageUrl: p.imageUrl || p.propertyData?.imageUrl || '',
-            videoUrl: p.videoUrl || p.propertyData?.videoUrl || '',
+            imageUrl: p.imageUrl || '',
+            videoUrl: p.videoUrl || '',
             isLive: true,
             blockchainTxHash: p.blockchainTxHash,
             explorerUrl: p.blockchainTxHash
@@ -304,14 +306,6 @@ export default function PropertiesPage() {
                         <div className="flex justify-between items-center text-sm">
                           <span className="text-white/50">Total Value</span>
                           <span className="font-semibold text-white">{property.totalValue > 0 ? `$${(property.totalValue / 1000000).toFixed(1)}M` : 'On-Chain'}</span>
-                        </div>
-                        <div className="flex justify-between items-center text-sm">
-                          <span className="text-white/50">Token Price</span>
-                          <span className="font-semibold text-white">{property.tokenPrice > 0 ? `$${property.tokenPrice.toFixed(2)}` : '-'}</span>
-                        </div>
-                        <div className="flex justify-between items-center text-sm">
-                          <span className="text-white/50">Annual Yield</span>
-                          <span className="font-semibold text-[#10b981]">{property.yieldPercent > 0 ? `${property.yieldPercent}%` : '-'}</span>
                         </div>
                       </div>
                       {property.fundedPercent > 0 && (
