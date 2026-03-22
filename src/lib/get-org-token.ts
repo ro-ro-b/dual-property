@@ -91,6 +91,12 @@ export async function getOrgToken(req: NextRequest): Promise<string> {
   const orgId = process.env.DUAL_ORG_ID || FALLBACK_ORG_ID;
   const isEnvToken = !headerToken && !cookieToken && token === envToken;
 
+  // If the token isn't a JWT (e.g. it's an API key), return it as-is
+  // — dualFetch will send it as X-Api-Key instead of Bearer
+  if (!isJwt(token)) {
+    return token;
+  }
+
   // Check if JWT is expired and try to refresh
   const { expired } = parseJwt(token);
   if (expired) {
@@ -102,8 +108,6 @@ export async function getOrgToken(req: NextRequest): Promise<string> {
         // Refresh failed for a user token — unusable
         return '';
       }
-      // For env token with no refresh cookie, try using it anyway —
-      // the gateway may still accept it or we'll fall back gracefully
     } else if (!isEnvToken) {
       // User token expired with no refresh — unusable
       return '';
@@ -118,7 +122,15 @@ export async function getOrgToken(req: NextRequest): Promise<string> {
 }
 
 /**
+ * Check if a string looks like a JWT (three dot-separated base64 segments).
+ */
+function isJwt(token: string): boolean {
+  return token.split('.').length === 3;
+}
+
+/**
  * Convenience: make an authenticated request to the DUAL gateway.
+ * Supports both JWT bearer tokens and API keys.
  */
 export async function dualFetch(
   path: string,
@@ -126,10 +138,20 @@ export async function dualFetch(
   options: RequestInit = {},
 ): Promise<Response> {
   const url = `${BASE_URL()}${path}`;
+  const apiKey = process.env.DUAL_API_KEY || process.env.DUAL_API_TOKEN || '';
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
     ...(options.headers as Record<string, string> || {}),
   };
+
+  // Use JWT as Bearer if it's a proper JWT, otherwise try API key header
+  if (token && isJwt(token)) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  // Always include API key if available (gateway may accept either)
+  if (apiKey) {
+    headers['X-Api-Key'] = apiKey;
+  }
+
   return fetch(url, { ...options, headers, cache: 'no-store' });
 }
