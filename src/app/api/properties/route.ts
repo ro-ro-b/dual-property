@@ -15,29 +15,27 @@ export async function GET() {
   }
 }
 
-// In-memory cache for auto-created template ID (persists across requests in same serverless instance)
+// In-memory cache for auto-created template ID
 let cachedTemplateId: string | null = null;
 
 // POST /api/properties — Mint a new property token
 export async function POST(req: NextRequest) {
   try {
-    // Try standard auth first, then fall back to Authorization header token
+    // Try standard auth first, then fall back to Authorization header / cookie
     let client = await getAuthenticatedClient();
+    let rawToken: string | null = null;
 
     if (!client) {
-      // Fall back to token from Authorization header (client-side pass-through)
       const authHeader = req.headers.get('authorization');
       const headerToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
-
-      // Also try cookie
       const cookieToken = req.cookies.get('dual_jwt')?.value;
-      const token = headerToken || cookieToken;
+      rawToken = headerToken || cookieToken || null;
 
-      if (token) {
+      if (rawToken) {
         const { DualClient } = await import('@/lib/dual-sdk');
         client = new DualClient({
           baseUrl: process.env.NEXT_PUBLIC_DUAL_API_URL || 'https://gateway-48587430648.europe-west6.run.app',
-          token,
+          token: rawToken,
           apiKey: process.env.DUAL_API_KEY || '',
           timeout: 30000,
           retry: { maxAttempts: 2, backoffMs: 500 },
@@ -57,61 +55,78 @@ export async function POST(req: NextRequest) {
     const num = body.num || 1;
     const rawData = body.data || {};
 
-    // Auto-create a template if none is configured
+    // Auto-discover or create a template if none is configured
     if (!templateId) {
+      const BASE = process.env.NEXT_PUBLIC_DUAL_API_URL || 'https://gateway-48587430648.europe-west6.run.app';
+      const token = rawToken || (client as any)?.http?.getToken?.() || '';
+      const authHeaders: Record<string, string> = {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      };
+
       try {
-        // First try to find an existing template
-        const existing = await client.templates.listTemplates({ limit: 10 });
-        const templates = existing?.items || existing?.templates || existing?.data || [];
-        if (Array.isArray(templates) && templates.length > 0) {
-          templateId = templates[0].id;
-        } else {
-          // Create a new property template
-          const created = await client.templates.createTemplate({
-            name: "Property Token",
-            description: "Tokenised real estate property",
+        // Try listing existing templates via direct HTTP
+        const listRes = await fetch(`${BASE}/templates?limit=10`, { headers: authHeaders });
+        if (listRes.ok) {
+          const listData = await listRes.json();
+          const templates = listData?.items || listData?.templates || listData?.data || [];
+          if (Array.isArray(templates) && templates.length > 0) {
+            templateId = templates[0].id;
+          }
+        }
+      } catch { /* ignore list errors */ }
+
+      // If still no template, try creating one
+      if (!templateId) {
+        try {
+          const createRes = await fetch(`${BASE}/templates`, {
+            method: 'POST',
+            headers: authHeaders,
+            body: JSON.stringify({
+              name: "Property Token",
+              description: "Tokenised real estate property",
+            }),
           });
-          templateId = created.id || created.template_id || created?.data?.id || '';
+          if (createRes.ok) {
+            const createData = await createRes.json();
+            templateId = createData.id || createData.template_id || '';
+          } else {
+            const errData = await createRes.text();
+            // Log but don't fail yet — try minting without template
+            console.warn('Template creation failed:', createRes.status, errData);
+          }
+        } catch (e: any) {
+          console.warn('Template creation error:', e.message);
         }
-        if (templateId) {
-          cachedTemplateId = templateId;
-        }
-      } catch (tmplErr: any) {
-        return NextResponse.json({ error: "Failed to auto-create template: " + (tmplErr.body?.message || tmplErr.message) }, { status: 500 });
       }
+
+      if (templateId) cachedTemplateId = templateId;
     }
 
-    if (!templateId) {
-      return NextResponse.json({ error: "Properties template ID not configured and auto-creation failed" }, { status: 400 });
-    }
-
+    // Build mint data
     const mintData: Record<string, any> = {};
-
     if (rawData.name || rawData.description) {
       mintData.metadata = {
         ...(rawData.name ? { name: rawData.name } : {}),
         ...(rawData.description ? { description: rawData.description } : {}),
       };
     }
-
     const { name: _n, description: _d, ...customFields } = rawData;
     const custom: Record<string, any> = { ...customFields };
     if (rawData.name) custom.name = rawData.name;
     if (rawData.description) custom.description = rawData.description;
+    if (Object.keys(custom).length > 0) mintData.custom = custom;
 
-    if (Object.keys(custom).length > 0) {
-      mintData.custom = custom;
+    // Build action payload — include template_id only if we have one
+    const mintAction: any = {
+      num,
+      ...(Object.keys(mintData).length > 0 ? { data: mintData } : {}),
+    };
+    if (templateId) {
+      mintAction.template_id = templateId;
     }
 
-    const actionPayload: any = {
-      action: {
-        mint: {
-          template_id: templateId,
-          num,
-          ...(Object.keys(mintData).length > 0 ? { data: mintData } : {}),
-        },
-      },
-    };
+    const actionPayload = { action: { mint: mintAction } };
 
     const result = await client.ebus.execute(actionPayload);
 
@@ -124,6 +139,6 @@ export async function POST(req: NextRequest) {
   } catch (err: any) {
     const status = err.status || 500;
     const message = err.body?.message || err.message || "Property mint failed";
-    return NextResponse.json({ error: message }, { status });
+    return NextResponse.json({ error: message, details: err.body }, { status });
   }
 }
