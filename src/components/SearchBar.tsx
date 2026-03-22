@@ -18,6 +18,7 @@ export default function SearchBar() {
   const [searching, setSearching] = useState(false);
   const router = useRouter();
   const ref = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   // Close on outside click
@@ -27,6 +28,23 @@ export default function SearchBar() {
     };
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  // Cmd+K / Ctrl+K shortcut
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        inputRef.current?.focus();
+        setOpen(true);
+      }
+      if (e.key === 'Escape') {
+        setOpen(false);
+        inputRef.current?.blur();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const handleSearch = (q: string) => {
@@ -67,6 +85,7 @@ export default function SearchBar() {
       <div className="flex items-center gap-2 bg-white/[0.05] border border-white/[0.1] rounded-lg px-3 py-1.5 focus-within:border-[#c9a84c]/50 transition-colors">
         <span className="material-symbols-outlined text-white/40 text-lg">search</span>
         <input
+          ref={inputRef}
           type="text"
           value={query}
           onChange={(e) => handleSearch(e.target.value)}
@@ -74,8 +93,12 @@ export default function SearchBar() {
           placeholder="Search properties..."
           className="bg-transparent text-white text-sm placeholder-white/40 focus:outline-none w-40 lg:w-56"
         />
-        {searching && (
+        {searching ? (
           <div className="w-4 h-4 border border-[#c9a84c] border-t-transparent rounded-full animate-spin" />
+        ) : (
+          <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-white/[0.08] border border-white/[0.1] rounded text-[10px] text-white/40 font-mono">
+            ⌘K
+          </kbd>
         )}
       </div>
 

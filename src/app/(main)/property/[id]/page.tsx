@@ -125,6 +125,12 @@ export default function PropertyDetailPage({
   const [transferLoading, setTransferLoading] = useState(false);
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [transferEmail, setTransferEmail] = useState('');
+  const [documents, setDocuments] = useState<any[]>([]);
+  const [faces, setFaces] = useState<any[]>([]);
+  const [children, setChildren] = useState<any[]>([]);
+  const [parents, setParents] = useState<any[]>([]);
+  const [investStep, setInvestStep] = useState<'amount' | 'confirm' | 'processing' | 'done'>('amount');
+  const [deposits, setDeposits] = useState<any[]>([]);
 
   // Fetch property data from API
   useEffect(() => {
@@ -186,6 +192,39 @@ export default function PropertyDetailPage({
       }).finally(() => setProvenanceLoading(false));
     }
   }, [activeTab, params.id]);
+
+  // Fetch documents, faces, and related objects when those tabs are active
+  useEffect(() => {
+    if (activeTab === 'documents') {
+      fetch(`/api/objects/${params.id}/documents`).then(r => r.json())
+        .then(data => setDocuments(Array.isArray(data.documents) ? data.documents : []))
+        .catch(() => setDocuments([]));
+    }
+    if (activeTab === 'media') {
+      fetch(`/api/objects/${params.id}/faces`).then(r => r.json())
+        .then(data => {
+          const f = Array.isArray(data.faces) ? data.faces : Array.isArray(data.faces?.data) ? data.faces.data : [];
+          setFaces(f);
+        })
+        .catch(() => setFaces([]));
+    }
+    if (activeTab === 'related') {
+      Promise.all([
+        fetch(`/api/objects/${params.id}/children`).then(r => r.json()).catch(() => ({ children: [] })),
+        fetch(`/api/objects/${params.id}/parents`).then(r => r.json()).catch(() => ({ parents: [] })),
+      ]).then(([childData, parentData]) => {
+        setChildren(Array.isArray(childData.children) ? childData.children : Array.isArray(childData.children?.data) ? childData.children.data : []);
+        setParents(Array.isArray(parentData.parents) ? parentData.parents : Array.isArray(parentData.parents?.data) ? parentData.parents.data : []);
+      });
+    }
+  }, [activeTab, params.id]);
+
+  // Fetch deposits for payment tracking
+  useEffect(() => {
+    fetch('/api/payments/deposits').then(r => r.json())
+      .then(data => setDeposits(Array.isArray(data.deposits) ? data.deposits : []))
+      .catch(() => {});
+  }, []);
 
   // Counter animation
   useEffect(() => {
@@ -376,7 +415,7 @@ export default function PropertyDetailPage({
             <div className="bg-[#111827]/80 rounded-2xl border border-white/[0.06] shadow-2xl overflow-hidden">
               {/* Tab Navigation */}
               <div className="flex border-b border-white/[0.06] overflow-x-auto">
-                {['overview', 'financials', 'on-chain', 'provenance'].map((tab) => (
+                {['overview', 'financials', 'documents', 'media', 'related', 'on-chain', 'provenance'].map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
@@ -386,7 +425,7 @@ export default function PropertyDetailPage({
                         : 'text-white/50 hover:text-white/70'
                     }`}
                   >
-                    {tab === 'on-chain' ? 'On-Chain' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                    {tab === 'on-chain' ? 'On-Chain' : tab === 'related' ? 'Related' : tab.charAt(0).toUpperCase() + tab.slice(1)}
                   </button>
                 ))}
               </div>
@@ -749,6 +788,120 @@ export default function PropertyDetailPage({
                     )}
                   </div>
                 )}
+
+                {/* DOCUMENTS TAB */}
+                {activeTab === 'documents' && (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-serif italic font-bold text-white">Property Documents</h3>
+                    </div>
+                    {documents.length > 0 ? (
+                      <div className="space-y-3">
+                        {documents.map((doc: any, i: number) => (
+                          <div key={doc.id || i} className="flex items-center justify-between p-4 bg-white/[0.03] rounded-lg border border-white/[0.06] hover:border-[#c9a84c]/20 transition-colors">
+                            <div className="flex items-center gap-3">
+                              <span className="material-symbols-outlined text-[#c9a84c]">description</span>
+                              <div>
+                                <p className="text-sm text-white font-medium">{doc.name || doc.filename || `Document ${i + 1}`}</p>
+                                <p className="text-xs text-white/40">{doc.type || doc.mimeType || 'Document'} {doc.size ? `• ${(doc.size / 1024).toFixed(0)} KB` : ''}</p>
+                              </div>
+                            </div>
+                            {doc.url && (
+                              <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-[#c9a84c] hover:text-[#e0c060]">
+                                <span className="material-symbols-outlined">download</span>
+                              </a>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <span className="material-symbols-outlined text-4xl text-white/20 mb-4 block">folder_open</span>
+                        <p className="text-white/50 mb-2">No documents uploaded yet.</p>
+                        <p className="text-white/40 text-sm">Property documents like deeds, appraisals, and inspection reports will appear here.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* MEDIA TAB */}
+                {activeTab === 'media' && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-serif italic font-bold text-white mb-4">Token Media / Faces</h3>
+                    {faces.length > 0 ? (
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {faces.map((face: any, i: number) => (
+                          <div key={face.id || i} className="bg-white/[0.03] rounded-lg border border-white/[0.06] overflow-hidden hover:border-[#c9a84c]/20 transition-colors">
+                            {face.imageUrl || face.url ? (
+                              <img src={face.imageUrl || face.url} alt={face.name || `Face ${i + 1}`} className="w-full h-32 object-cover" />
+                            ) : (
+                              <div className="w-full h-32 bg-gradient-to-br from-[#c9a84c]/20 to-transparent flex items-center justify-center">
+                                <span className="material-symbols-outlined text-3xl text-[#c9a84c]/40">image</span>
+                              </div>
+                            )}
+                            <div className="p-3">
+                              <p className="text-sm text-white font-medium truncate">{face.name || `Face ${i + 1}`}</p>
+                              {face.description && <p className="text-xs text-white/40 mt-1 truncate">{face.description}</p>}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <span className="material-symbols-outlined text-4xl text-white/20 mb-4 block">image</span>
+                        <p className="text-white/50 mb-2">No media assets yet.</p>
+                        <p className="text-white/40 text-sm">Token faces and media like photos, renders, and visual assets will appear here.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* RELATED TAB */}
+                {activeTab === 'related' && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-serif italic font-bold text-white mb-4">Related Objects</h3>
+
+                    {/* Children */}
+                    <div>
+                      <h4 className="text-sm font-semibold text-white/70 uppercase tracking-wider mb-3">Child Objects</h4>
+                      {children.length > 0 ? (
+                        <div className="space-y-2">
+                          {children.map((child: any, i: number) => (
+                            <a key={child.id || i} href={`/property/${child.id}`} className="flex items-center gap-3 p-3 bg-white/[0.03] rounded-lg border border-white/[0.06] hover:border-[#c9a84c]/20 transition-colors">
+                              <span className="material-symbols-outlined text-[#c9a84c]">account_tree</span>
+                              <div>
+                                <p className="text-sm text-white">{child.name || child.id}</p>
+                                {child.type && <p className="text-xs text-white/40">{child.type}</p>}
+                              </div>
+                            </a>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-white/40 text-sm py-4">No child objects found.</p>
+                      )}
+                    </div>
+
+                    {/* Parents */}
+                    <div>
+                      <h4 className="text-sm font-semibold text-white/70 uppercase tracking-wider mb-3">Parent Objects</h4>
+                      {parents.length > 0 ? (
+                        <div className="space-y-2">
+                          {parents.map((parent: any, i: number) => (
+                            <a key={parent.id || i} href={`/property/${parent.id}`} className="flex items-center gap-3 p-3 bg-white/[0.03] rounded-lg border border-white/[0.06] hover:border-[#c9a84c]/20 transition-colors">
+                              <span className="material-symbols-outlined text-[#c9a84c]">family_restroom</span>
+                              <div>
+                                <p className="text-sm text-white">{parent.name || parent.id}</p>
+                                {parent.type && <p className="text-xs text-white/40">{parent.type}</p>}
+                              </div>
+                            </a>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-white/40 text-sm py-4">No parent objects found.</p>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -912,21 +1065,77 @@ export default function PropertyDetailPage({
                 </div>
               )}
 
-              {/* Action Buttons */}
+              {/* Action Buttons — Multi-step invest flow */}
               <div className="space-y-3">
-                <button
-                  onClick={handleInvest}
-                  disabled={investLoading || investmentAmount <= 0}
-                  className="w-full py-4 bg-gradient-to-r from-[#c9a84c] to-[#a68832] text-[#0a0e1a] font-semibold rounded-lg hover:shadow-lg hover:shadow-[#c9a84c]/30 transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
-                >
-                  {investLoading ? 'Processing...' : 'Invest Now'}
-                </button>
-                <button
-                  onClick={() => setShowTransferModal(true)}
-                  className="w-full py-4 bg-white/[0.05] border border-white/[0.1] text-white font-semibold rounded-lg hover:border-[#c9a84c]/30 transition-colors"
-                >
-                  Transfer Tokens
-                </button>
+                {investStep === 'amount' && (
+                  <>
+                    <button
+                      onClick={() => investmentAmount > 0 && setInvestStep('confirm')}
+                      disabled={investmentAmount <= 0}
+                      className="w-full py-4 bg-gradient-to-r from-[#c9a84c] to-[#a68832] text-[#0a0e1a] font-semibold rounded-lg hover:shadow-lg hover:shadow-[#c9a84c]/30 transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
+                    >
+                      Continue to Invest
+                    </button>
+                    <button
+                      onClick={() => setShowTransferModal(true)}
+                      className="w-full py-4 bg-white/[0.05] border border-white/[0.1] text-white font-semibold rounded-lg hover:border-[#c9a84c]/30 transition-colors"
+                    >
+                      Transfer Tokens
+                    </button>
+                  </>
+                )}
+                {investStep === 'confirm' && (
+                  <div className="space-y-4">
+                    <div className="p-4 bg-[#c9a84c]/10 border border-[#c9a84c]/30 rounded-lg">
+                      <p className="text-xs text-[#c9a84c] uppercase tracking-wider mb-2">Confirm Investment</p>
+                      <p className="text-white font-semibold text-lg">${investmentAmount.toLocaleString()}</p>
+                      <p className="text-white/60 text-sm mt-1">{tokens.toLocaleString()} tokens @ ${property.tokenPrice?.toFixed(2)}/token</p>
+                      {monthlyYield > 0 && <p className="text-[#10b981] text-sm mt-2">Est. monthly yield: ${monthlyYield.toFixed(0)}</p>}
+                    </div>
+                    <button
+                      onClick={async () => {
+                        setInvestStep('processing');
+                        await handleInvest();
+                        setInvestStep('done');
+                        setTimeout(() => setInvestStep('amount'), 5000);
+                      }}
+                      disabled={investLoading}
+                      className="w-full py-4 bg-gradient-to-r from-[#10b981] to-[#059669] text-white font-semibold rounded-lg hover:shadow-lg transition-all"
+                    >
+                      {investLoading ? 'Processing...' : 'Confirm & Invest'}
+                    </button>
+                    <button
+                      onClick={() => setInvestStep('amount')}
+                      className="w-full py-2 text-white/50 hover:text-white text-sm transition-colors"
+                    >
+                      Go Back
+                    </button>
+                  </div>
+                )}
+                {investStep === 'processing' && (
+                  <div className="text-center py-4">
+                    <div className="w-8 h-8 border-2 border-[#c9a84c] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                    <p className="text-white/70 text-sm">Processing your investment...</p>
+                  </div>
+                )}
+                {investStep === 'done' && (
+                  <div className="text-center py-4">
+                    <span className="material-symbols-outlined text-3xl text-[#10b981] mb-2 block">check_circle</span>
+                    <p className="text-[#10b981] font-semibold">Investment Submitted!</p>
+                    <p className="text-white/50 text-sm mt-1">Check your portfolio for details.</p>
+                  </div>
+                )}
+                {deposits.length > 0 && investStep === 'amount' && (
+                  <div className="mt-4 pt-4 border-t border-white/[0.06]">
+                    <p className="text-xs text-white/50 uppercase tracking-wider mb-2">Recent Deposits</p>
+                    {deposits.slice(0, 3).map((dep: any, i: number) => (
+                      <div key={dep.id || i} className="flex justify-between text-xs py-1">
+                        <span className="text-white/60">{dep.amount ? `$${dep.amount}` : dep.status || 'Deposit'}</span>
+                        <span className="text-white/40">{dep.createdAt ? new Date(dep.createdAt).toLocaleDateString() : ''}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Powered By Badge */}

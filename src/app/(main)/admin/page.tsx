@@ -65,6 +65,12 @@ export default function PropertyAdminPage() {
   const [batches, setBatches] = useState<any[]>([]);
   const [faces, setFaces] = useState<any[]>([]);
   const [paymentConfig, setPaymentConfig] = useState<any>(null);
+  const [webhookUrl, setWebhookUrl] = useState('');
+  const [webhookRegistering, setWebhookRegistering] = useState(false);
+  const [webhookResult, setWebhookResult] = useState<any>(null);
+  const [sequencerActions, setSequencerActions] = useState<Array<{type: string; data: string}>>([{ type: 'mint', data: '' }]);
+  const [sequencerRunning, setSequencerRunning] = useState(false);
+  const [sequencerResult, setSequencerResult] = useState<any>(null);
 
   // Check auth on mount
   useEffect(() => {
@@ -590,6 +596,169 @@ export default function PropertyAdminPage() {
             <p className="text-xl font-bold text-white">{paymentConfig ? 'Active' : '-'}</p>
             <p className="text-xs text-gray-500">Config status</p>
           </div>
+        </div>
+
+        {/* Webhook Auto-Registration Panel */}
+        <div className="bg-card-dark rounded-lg border border-gold-dim/20 p-6 mb-8">
+          <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+            <span className="material-symbols-outlined text-gold-bright">webhook</span>
+            Webhook Auto-Registration
+          </h2>
+          <p className="text-gray-400 text-sm mb-4">
+            Automatically register webhooks for all standard DUAL events (object.created, object.transferred, action.executed, payment.completed, etc.)
+          </p>
+          <div className="flex gap-3 mb-4">
+            <input
+              type="url"
+              value={webhookUrl}
+              onChange={(e) => setWebhookUrl(e.target.value)}
+              placeholder="https://your-domain.com/api/webhooks/receive"
+              className="flex-1 px-4 py-2 rounded bg-navy-light border border-gold-dim/20 text-white placeholder-gray-500 focus:outline-none focus:border-gold-bright transition"
+            />
+            <button
+              onClick={async () => {
+                if (!webhookUrl) return;
+                setWebhookRegistering(true);
+                setWebhookResult(null);
+                try {
+                  const res = await fetch('/api/webhooks/auto-register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ callbackUrl: webhookUrl }),
+                  });
+                  const data = await res.json();
+                  setWebhookResult(data);
+                  // Refresh webhook count
+                  fetch('/api/webhooks/register').then(r => r.json()).then(data => {
+                    const wh = Array.isArray(data.webhooks) ? data.webhooks : Array.isArray(data.webhooks?.data) ? data.webhooks.data : [];
+                    setWebhooks(wh);
+                  }).catch(() => {});
+                } catch (err: any) {
+                  setWebhookResult({ error: err.message });
+                } finally {
+                  setWebhookRegistering(false);
+                }
+              }}
+              disabled={webhookRegistering || !webhookUrl}
+              className="px-6 py-2 rounded bg-gradient-to-r from-gold-bright to-gold-dim text-navy-dark font-semibold hover:shadow-lg hover:shadow-gold-bright/50 disabled:opacity-50 disabled:cursor-not-allowed transition whitespace-nowrap"
+            >
+              {webhookRegistering ? 'Registering...' : 'Auto-Register All'}
+            </button>
+          </div>
+          {webhookResult && (
+            <div className={`p-3 rounded text-sm ${webhookResult.error ? 'bg-red-900/20 border border-red-500/30 text-red-200' : 'bg-green-900/20 border border-green-500/30 text-green-200'}`}>
+              {webhookResult.error
+                ? `Error: ${webhookResult.error}`
+                : `Registered ${webhookResult.registered} webhooks (${webhookResult.failed} failed)`}
+            </div>
+          )}
+          {webhooks.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-gold-dim/10">
+              <p className="text-xs text-gray-500 mb-2">Active Webhooks ({webhooks.length})</p>
+              <div className="space-y-1 max-h-32 overflow-y-auto">
+                {webhooks.map((wh: any, i: number) => (
+                  <div key={wh.id || i} className="flex items-center gap-2 text-xs">
+                    <span className="w-2 h-2 rounded-full bg-green-400" />
+                    <span className="text-white/60 truncate">{wh.url || wh.callbackUrl || 'Webhook'}</span>
+                    <span className="text-gray-500 ml-auto">{wh.events?.length || 0} events</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Sequencer Workflow Builder */}
+        <div className="bg-card-dark rounded-lg border border-gold-dim/20 p-6 mb-8">
+          <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+            <span className="material-symbols-outlined text-gold-bright">reorder</span>
+            Sequencer Workflow Builder
+          </h2>
+          <p className="text-gray-400 text-sm mb-4">
+            Chain multiple actions into a single sequential workflow. Actions execute in order through the DUAL ebus.
+          </p>
+          <div className="space-y-3 mb-4">
+            {sequencerActions.map((action, i) => (
+              <div key={i} className="flex gap-3 items-start">
+                <span className="text-gold-bright font-mono text-sm mt-2 w-6">{i + 1}.</span>
+                <select
+                  value={action.type}
+                  onChange={(e) => {
+                    const updated = [...sequencerActions];
+                    updated[i].type = e.target.value;
+                    setSequencerActions(updated);
+                  }}
+                  className="px-3 py-2 rounded bg-navy-light border border-gold-dim/20 text-white text-sm focus:outline-none focus:border-gold-bright transition"
+                >
+                  <option value="mint">Mint</option>
+                  <option value="transfer">Transfer</option>
+                  <option value="burn">Burn</option>
+                  <option value="custom">Custom Action</option>
+                </select>
+                <input
+                  type="text"
+                  value={action.data}
+                  onChange={(e) => {
+                    const updated = [...sequencerActions];
+                    updated[i].data = e.target.value;
+                    setSequencerActions(updated);
+                  }}
+                  placeholder='{"objectId": "...", "amount": 1}'
+                  className="flex-1 px-3 py-2 rounded bg-navy-light border border-gold-dim/20 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-gold-bright transition font-mono"
+                />
+                {sequencerActions.length > 1 && (
+                  <button
+                    onClick={() => setSequencerActions(sequencerActions.filter((_, j) => j !== i))}
+                    className="p-2 text-red-400 hover:text-red-300 transition"
+                  >
+                    <span className="material-symbols-outlined text-sm">close</span>
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setSequencerActions([...sequencerActions, { type: 'mint', data: '' }])}
+              className="px-4 py-2 rounded border border-gold-dim/30 text-gold-bright text-sm hover:bg-gold-dim/10 transition"
+            >
+              + Add Step
+            </button>
+            <button
+              onClick={async () => {
+                setSequencerRunning(true);
+                setSequencerResult(null);
+                try {
+                  const actions = sequencerActions.map(a => ({
+                    type: a.type,
+                    ...( a.data ? JSON.parse(a.data) : {}),
+                  }));
+                  const res = await fetch('/api/sequencer/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ actions }),
+                  });
+                  const data = await res.json();
+                  setSequencerResult(data);
+                } catch (err: any) {
+                  setSequencerResult({ error: err.message || 'Failed to execute sequence' });
+                } finally {
+                  setSequencerRunning(false);
+                }
+              }}
+              disabled={sequencerRunning}
+              className="px-6 py-2 rounded bg-gradient-to-r from-gold-bright to-gold-dim text-navy-dark font-semibold hover:shadow-lg hover:shadow-gold-bright/50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            >
+              {sequencerRunning ? 'Executing...' : 'Execute Sequence'}
+            </button>
+          </div>
+          {sequencerResult && (
+            <div className={`mt-4 p-3 rounded text-sm ${sequencerResult.error ? 'bg-red-900/20 border border-red-500/30 text-red-200' : 'bg-green-900/20 border border-green-500/30 text-green-200'}`}>
+              {sequencerResult.error
+                ? `Error: ${sequencerResult.error}`
+                : `Executed ${sequencerResult.totalExecuted} actions: ${sequencerResult.results?.filter((r: any) => r.success).length} succeeded, ${sequencerResult.results?.filter((r: any) => !r.success).length} failed`}
+            </div>
+          )}
         </div>
 
         {/* Template Selector */}

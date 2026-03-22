@@ -37,3 +37,28 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+// Mark notification(s) as read
+export async function PATCH(req: NextRequest) {
+  try {
+    const client = await getAuthenticatedClient();
+    if (!client) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const { ids, markAllRead } = body;
+
+    // The DUAL API doesn't have a native mark-read endpoint,
+    // so we track read state client-side and acknowledge here
+    return NextResponse.json({
+      success: true,
+      markedRead: markAllRead ? 'all' : ids || [],
+    });
+  } catch (err: any) {
+    return NextResponse.json(
+      { error: err.message || "Failed to mark as read" },
+      { status: err.status || 500 }
+    );
+  }
+}
