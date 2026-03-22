@@ -15,6 +15,9 @@ export async function GET() {
   }
 }
 
+// In-memory cache for auto-created template ID (persists across requests in same serverless instance)
+let cachedTemplateId: string | null = null;
+
 // POST /api/properties — Mint a new property token
 export async function POST(req: NextRequest) {
   try {
@@ -27,12 +30,36 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const templateId = body.templateId || process.env.DUAL_PROPERTIES_TEMPLATE_ID || '';
+    let templateId = body.templateId || process.env.DUAL_PROPERTIES_TEMPLATE_ID || cachedTemplateId || '';
     const num = body.num || 1;
     const rawData = body.data || {};
 
+    // Auto-create a template if none is configured
     if (!templateId) {
-      return NextResponse.json({ error: "Properties template ID not configured" }, { status: 400 });
+      try {
+        // First try to find an existing template
+        const existing = await client.templates.listTemplates({ limit: 10 });
+        const templates = existing?.items || existing?.templates || existing?.data || [];
+        if (Array.isArray(templates) && templates.length > 0) {
+          templateId = templates[0].id;
+        } else {
+          // Create a new property template
+          const created = await client.templates.createTemplate({
+            name: "Property Token",
+            description: "Tokenised real estate property",
+          });
+          templateId = created.id || created.template_id || created?.data?.id || '';
+        }
+        if (templateId) {
+          cachedTemplateId = templateId;
+        }
+      } catch (tmplErr: any) {
+        return NextResponse.json({ error: "Failed to auto-create template: " + (tmplErr.body?.message || tmplErr.message) }, { status: 500 });
+      }
+    }
+
+    if (!templateId) {
+      return NextResponse.json({ error: "Properties template ID not configured and auto-creation failed" }, { status: 400 });
     }
 
     const mintData: Record<string, any> = {};
