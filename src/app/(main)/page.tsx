@@ -15,6 +15,8 @@ interface Property {
   fundedPercent: number;
   sqft: number;
   imageGradient: string;
+  imageUrl?: string;
+  videoUrl?: string;
   isLive: boolean;
   blockchainTxHash?: string;
   explorerUrl?: string;
@@ -63,6 +65,8 @@ export default function PropertiesPage() {
               : 0,
             sqft: p.propertyData?.totalSqft || 0,
             imageGradient: GRADIENTS[idx % GRADIENTS.length],
+            imageUrl: p.imageUrl || p.propertyData?.imageUrl || '',
+            videoUrl: p.videoUrl || p.propertyData?.videoUrl || '',
             isLive: true,
             blockchainTxHash: p.blockchainTxHash,
             explorerUrl: p.blockchainTxHash
@@ -270,7 +274,10 @@ export default function PropertiesPage() {
               <Link key={property.id} href={`/property/${property.id}`}>
                 <div className="group cursor-pointer h-full">
                   <div className="bg-[#111827]/80 rounded-2xl border border-white/[0.06] shadow-2xl overflow-hidden hover:border-[#c9a84c]/30 transition-all duration-500 h-full flex flex-col transform hover:scale-105">
-                    <div className={`h-48 bg-gradient-to-br ${property.imageGradient} relative overflow-hidden`}>
+                    <div className={`h-48 ${property.imageUrl ? '' : `bg-gradient-to-br ${property.imageGradient}`} relative overflow-hidden`}>
+                      {property.imageUrl && (
+                        <img src={property.imageUrl} alt={property.name} className="absolute inset-0 w-full h-full object-cover" />
+                      )}
                       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/20" />
                       <div className="absolute top-4 right-4">
                         <span className="px-3 py-1 bg-[#10b981]/80 backdrop-blur text-white text-xs font-semibold rounded-full">{property.type}</span>

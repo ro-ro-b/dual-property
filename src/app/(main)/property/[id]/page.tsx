@@ -14,6 +14,8 @@ interface Property {
   fundedPercent: number;
   sqft: number;
   imageGradient: string;
+  imageUrl?: string;
+  videoUrl?: string;
   yearBuilt?: number;
   units?: number;
   description?: string;
@@ -151,6 +153,8 @@ export default function PropertyDetailPage({
             fundedPercent: p.fundedPercent || p.metadata?.fundedPercent || 0,
             sqft: p.sqft || p.metadata?.sqft || 0,
             imageGradient: p.imageGradient || hashToGradient(params.id),
+            imageUrl: p.imageUrl || p.metadata?.imageUrl || '',
+            videoUrl: p.videoUrl || p.metadata?.videoUrl || '',
             yearBuilt: p.yearBuilt || p.metadata?.yearBuilt,
             units: p.units || p.metadata?.units,
             description: p.description || p.metadata?.description || 'A tokenized real estate property on the DUAL network.',
@@ -330,9 +334,21 @@ export default function PropertyDetailPage({
   return (
     <div className="min-h-screen bg-[#0a0e1a]">
       {/* Hero Section */}
-      <div className={`h-96 bg-gradient-to-br ${gradient} relative overflow-hidden`}>
+      <div className={`h-96 ${property.imageUrl ? '' : `bg-gradient-to-br ${gradient}`} relative overflow-hidden`}>
+        {property.videoUrl ? (
+          <video
+            src={property.videoUrl}
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        ) : property.imageUrl ? (
+          <img src={property.imageUrl} alt={property.name} className="absolute inset-0 w-full h-full object-cover" />
+        ) : null}
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e1a] to-transparent" />
-        <div className="absolute top-4 left-6">
+        <div className="absolute top-4 left-6 z-10">
           <Link
             href="/"
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"

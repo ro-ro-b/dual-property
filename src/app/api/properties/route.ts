@@ -77,6 +77,8 @@ export async function GET(req: NextRequest) {
           capRate: fin.capRate || c.capRate || 0,
           projectedAppreciation: fin.projectedAppreciation || c.projectedAppreciation || 0,
         },
+        imageUrl: c.imageUrl || '',
+        videoUrl: c.videoUrl || '',
         templateId: obj.template_id,
         ownerId: obj.owner_id || obj.owner,
         blockchainTxHash: obj.integrity_hash,

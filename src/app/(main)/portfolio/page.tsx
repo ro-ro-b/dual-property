@@ -16,6 +16,7 @@ interface Holding {
   tokensSold: number;
   annualYield: number;
   imageGradient: string;
+  imageUrl?: string;
   blockchainTxHash?: string;
 }
 
@@ -73,6 +74,7 @@ function PortfolioContent() {
             tokensSold: pd.tokensSold || 0,
             annualYield: pd.annualYield || inv.annualYield || 0,
             imageGradient: GRADIENTS[idx % GRADIENTS.length],
+            imageUrl: p.imageUrl || '',
             blockchainTxHash: p.blockchainTxHash,
           };
         });
@@ -276,7 +278,10 @@ function PortfolioContent() {
             {holdings.map((holding) => (
               <div key={holding.id} className="group h-full">
                 <div className="bg-[#111827]/80 rounded-2xl border border-white/[0.06] shadow-2xl overflow-hidden hover:border-[#c9a84c]/30 transition-all duration-500 h-full flex flex-col">
-                  <div className={`h-32 bg-gradient-to-br ${holding.imageGradient} relative overflow-hidden`}>
+                  <div className={`h-32 ${holding.imageUrl ? '' : `bg-gradient-to-br ${holding.imageGradient}`} relative overflow-hidden`}>
+                    {holding.imageUrl && (
+                      <img src={holding.imageUrl} alt={holding.name} className="absolute inset-0 w-full h-full object-cover" />
+                    )}
                     <div className="absolute top-4 right-4 flex items-center gap-2">
                       <span className="px-3 py-1 bg-[#c9a84c]/90 text-[#0a0e1a] text-xs font-black rounded-full flex items-center gap-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#0a0e1a] animate-pulse" />

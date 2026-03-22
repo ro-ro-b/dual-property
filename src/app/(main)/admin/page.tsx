@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -72,6 +72,15 @@ export default function PropertyAdminPage() {
   const [sequencerActions, setSequencerActions] = useState<Array<{type: string; data: string}>>([{ type: 'mint', data: '' }]);
   const [sequencerRunning, setSequencerRunning] = useState(false);
   const [sequencerResult, setSequencerResult] = useState<any>(null);
+
+  // AI Asset Generation
+  const [imageUrl, setImageUrl] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
+  const [generating, setGenerating] = useState(false);
+  const [genPhase, setGenPhase] = useState<'idle' | 'image' | 'video' | 'done'>('idle');
+  const [genError, setGenError] = useState('');
+  const imageBase64Ref = useRef('');
+  const imageMimeTypeRef = useRef('image/png');
 
   // Check auth on mount
   useEffect(() => {
@@ -204,6 +213,70 @@ export default function PropertyAdminPage() {
     setForm((f) => ({ ...f, [key]: value }));
   };
 
+  // ── AI Asset Generation ──
+  const handleGenerateImage = async () => {
+    if (!form.name) { setGenError('Fill in the property name first.'); return; }
+    setGenerating(true); setGenPhase('image'); setGenError('');
+    try {
+      const res = await fetch('/api/generate-image', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: form.name, address: form.address, city: form.city, country: form.country, propertyType: form.propertyType, description: form.description, yearBuilt: form.yearBuilt, totalSqft: form.totalSqft, totalPropertyValue: form.totalPropertyValue, annualYield: form.annualYield }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) { setGenError(data.error || 'Image generation failed'); setGenPhase('idle'); setGenerating(false); return; }
+      setImageUrl(data.imageUrl);
+      imageBase64Ref.current = data.imageBase64;
+      imageMimeTypeRef.current = data.mimeType || 'image/png';
+      setGenPhase('done');
+    } catch (err: any) { setGenError(err.message || 'Image generation failed'); setGenPhase('idle'); }
+    setGenerating(false);
+  };
+
+  const handleGenerateVideo = async () => {
+    if (!form.name) { setGenError('Fill in the property name first.'); return; }
+    setGenerating(true); setGenPhase('video'); setGenError('');
+    try {
+      const res = await fetch('/api/generate-video', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: form.name, city: form.city, country: form.country, propertyType: form.propertyType, description: form.description, imageBase64: imageBase64Ref.current || undefined, imageMimeType: imageMimeTypeRef.current || undefined }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) { setGenError(data.error || 'Video generation failed'); setGenPhase('done'); setGenerating(false); return; }
+      setVideoUrl(data.videoUrl);
+      setGenPhase('done');
+    } catch (err: any) { setGenError(err.message || 'Video generation failed'); setGenPhase('done'); }
+    setGenerating(false);
+  };
+
+  const handleGenerateAssets = async () => {
+    if (!form.name) { setGenError('Fill in the property name first.'); return; }
+    setGenerating(true); setGenPhase('image'); setGenError('');
+    // Phase 1: Image
+    try {
+      const imgRes = await fetch('/api/generate-image', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: form.name, address: form.address, city: form.city, country: form.country, propertyType: form.propertyType, description: form.description, yearBuilt: form.yearBuilt, totalSqft: form.totalSqft }),
+      });
+      const imgData = await imgRes.json();
+      if (!imgRes.ok || !imgData.success) { setGenError(imgData.error || 'Image generation failed'); setGenPhase('idle'); setGenerating(false); return; }
+      setImageUrl(imgData.imageUrl);
+      imageBase64Ref.current = imgData.imageBase64;
+      imageMimeTypeRef.current = imgData.mimeType || 'image/png';
+    } catch (err: any) { setGenError(err.message); setGenPhase('idle'); setGenerating(false); return; }
+    // Phase 2: Video
+    setGenPhase('video');
+    try {
+      const vidRes = await fetch('/api/generate-video', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: form.name, city: form.city, country: form.country, propertyType: form.propertyType, description: form.description, imageBase64: imageBase64Ref.current, imageMimeType: imageMimeTypeRef.current }),
+      });
+      const vidData = await vidRes.json();
+      if (vidRes.ok && vidData.success) { setVideoUrl(vidData.videoUrl); }
+      else { setGenError(vidData.error || 'Video generation failed (image OK)'); }
+    } catch (err: any) { setGenError(err.message + ' (image OK)'); }
+    setGenPhase('done'); setGenerating(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -242,34 +315,35 @@ export default function PropertyAdminPage() {
     setMintSteps([...steps]);
 
     try {
-      const mintPayload = {
-        data: {
-          name: form.name,
-          address: form.address,
-          city: form.city,
-          country: form.country,
-          propertyType: form.propertyType,
-          yearBuilt: form.yearBuilt,
-          totalSqft: form.totalSqft,
-          numberOfUnits: form.numberOfUnits,
-          description: form.description,
-          keyFeatures: form.keyFeatures.split(',').map(f => f.trim()).filter(Boolean),
-          investment: {
-            totalPropertyValue: form.totalPropertyValue,
-            tokenPricePerShare: form.tokenPricePerShare,
-            totalTokens: form.totalTokens,
-            annualYield: form.annualYield,
-            minimumInvestment: form.minimumInvestment,
-          },
-          financials: {
-            monthlyRentalIncome: form.monthlyRentalIncome,
-            annualExpenses: form.annualExpenses,
-            netOperatingIncome: form.netOperatingIncome,
-            capRate: form.capRate,
-            projectedAppreciation: form.projectedAppreciation,
-          },
-        },
+      // Include non-data-URL images/videos in mint payload (small URLs like hosted paths)
+      const isDataUrl = (url: string) => url.startsWith('data:');
+      const mintCustom: Record<string, any> = {
+        name: form.name,
+        address: form.address,
+        city: form.city,
+        country: form.country,
+        propertyType: form.propertyType,
+        yearBuilt: form.yearBuilt,
+        totalSqft: form.totalSqft,
+        numberOfUnits: form.numberOfUnits,
+        description: form.description,
+        keyFeatures: form.keyFeatures.split(',').map(f => f.trim()).filter(Boolean),
+        totalPropertyValue: form.totalPropertyValue,
+        tokenPricePerShare: form.tokenPricePerShare,
+        totalTokens: form.totalTokens,
+        annualYield: form.annualYield,
+        minimumInvestment: form.minimumInvestment,
+        monthlyRentalIncome: form.monthlyRentalIncome,
+        annualExpenses: form.annualExpenses,
+        netOperatingIncome: form.netOperatingIncome,
+        capRate: form.capRate,
+        projectedAppreciation: form.projectedAppreciation,
       };
+      // Only include URLs in mint if they're short (not base64 data URLs)
+      if (imageUrl && !isDataUrl(imageUrl)) mintCustom.imageUrl = imageUrl;
+      if (videoUrl && !isDataUrl(videoUrl)) mintCustom.videoUrl = videoUrl;
+
+      const mintPayload = { data: mintCustom };
 
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (jwtToken) headers['Authorization'] = `Bearer ${jwtToken}`;
@@ -292,6 +366,21 @@ export default function PropertyAdminPage() {
 
       steps.find(s => s.id === 'mint')!.status = 'done';
       setMintSteps([...steps]);
+
+      // Step 3b: Attach AI-generated assets via PATCH if they're data URLs
+      const objectId = data.objectIds?.[0];
+      if (objectId && (imageUrl || videoUrl)) {
+        const patchCustom: Record<string, string> = {};
+        if (imageUrl) patchCustom.imageUrl = imageUrl;
+        if (videoUrl) patchCustom.videoUrl = videoUrl;
+        try {
+          await fetch(`/api/objects/${objectId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', ...(jwtToken ? { Authorization: `Bearer ${jwtToken}` } : {}) },
+            body: JSON.stringify({ custom: patchCustom }),
+          });
+        } catch { /* best effort — assets may exceed body limit */ }
+      }
 
       // Step 4: Anchoring
       await sleep(400);
@@ -520,6 +609,8 @@ export default function PropertyAdminPage() {
                   projectedAppreciation: 0,
                 });
                 setMintResult(null);
+                setImageUrl(''); setVideoUrl(''); setGenPhase('idle'); setGenError('');
+                imageBase64Ref.current = ''; imageMimeTypeRef.current = 'image/png';
               }}
               className="flex-1 px-6 py-3 rounded bg-gradient-to-r from-[#c9a84c] to-[#a68832] text-[#0a0e1a] font-semibold hover:shadow-lg hover:shadow-[#c9a84c]/50 transition"
             >
@@ -1056,6 +1147,94 @@ export default function PropertyAdminPage() {
                 />
               </div>
             </div>
+          </div>
+
+          {/* AI Asset Generation */}
+          <div className="bg-[#111827] rounded-lg border border-[#c9a84c]/20 p-6">
+            <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
+              <span className="text-[#c9a84c]">✨</span> AI Asset Generation
+            </h2>
+            <p className="text-gray-400 text-sm mb-4">Generate AI property images and cinematic videos using Google Gemini. Fill in the property details above first.</p>
+
+            {genError && (
+              <div className="mb-4 p-3 rounded bg-red-900/30 border border-red-500/30 text-red-200 text-sm">{genError}</div>
+            )}
+
+            {/* Generation buttons */}
+            {!imageUrl && !generating && (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <button type="button" onClick={handleGenerateImage} className="px-4 py-3 rounded border-2 border-dashed border-[#c9a84c]/30 text-[#c9a84c] hover:border-[#c9a84c]/60 hover:bg-[#c9a84c]/5 transition flex items-center justify-center gap-2">
+                  <span className="material-symbols-outlined text-sm">image</span>
+                  Generate Image
+                </button>
+                <button type="button" onClick={handleGenerateAssets} className="px-4 py-3 rounded bg-gradient-to-r from-[#c9a84c]/20 to-[#a68832]/20 border border-[#c9a84c]/40 text-[#c9a84c] hover:from-[#c9a84c]/30 hover:to-[#a68832]/30 transition flex items-center justify-center gap-2 font-semibold">
+                  <span className="material-symbols-outlined text-sm">auto_awesome</span>
+                  Image + Video
+                </button>
+                <button type="button" onClick={handleGenerateVideo} disabled={!imageUrl} className="px-4 py-3 rounded border-2 border-dashed border-[#c9a84c]/30 text-[#c9a84c] hover:border-[#c9a84c]/60 hover:bg-[#c9a84c]/5 transition flex items-center justify-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed">
+                  <span className="material-symbols-outlined text-sm">movie_creation</span>
+                  Generate Video
+                </button>
+              </div>
+            )}
+
+            {/* Generating spinner */}
+            {generating && (
+              <div className="flex flex-col items-center gap-3 py-6">
+                <div className="relative w-12 h-12">
+                  <div className="absolute inset-0 rounded-full border-2 border-[#c9a84c]/30 border-t-[#c9a84c] animate-spin" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-[#c9a84c] text-lg">{genPhase === 'image' ? 'image' : 'movie_creation'}</span>
+                  </div>
+                </div>
+                <p className="text-sm font-semibold text-[#c9a84c]">
+                  {genPhase === 'image' ? 'Generating Property Image...' : 'Generating Cinematic Video...'}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {genPhase === 'image' ? 'Usually takes 5–15 seconds' : 'May take 30–120 seconds'}
+                </p>
+                <div className="flex gap-3 mt-1">
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${genPhase === 'image' ? 'bg-[#c9a84c]/20 text-[#c9a84c] animate-pulse' : imageUrl ? 'bg-green-500/10 text-green-400' : 'bg-white/5 text-white/30'}`}>
+                    {imageUrl ? '✓' : '◎'} Image
+                  </span>
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${genPhase === 'video' ? 'bg-[#c9a84c]/20 text-[#c9a84c] animate-pulse' : videoUrl ? 'bg-green-500/10 text-green-400' : 'bg-white/5 text-white/30'}`}>
+                    {videoUrl ? '✓' : '◎'} Video
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Preview generated assets */}
+            {imageUrl && !generating && (
+              <div className="space-y-4">
+                <div className="relative rounded-lg overflow-hidden border border-[#c9a84c]/20">
+                  <div className="flex items-center justify-between px-3 py-2 bg-[#0a0e1a]">
+                    <span className="text-xs font-semibold text-white/70 flex items-center gap-1"><span className="material-symbols-outlined text-xs text-[#c9a84c]">image</span> AI Property Image</span>
+                    <button type="button" onClick={handleGenerateImage} className="text-xs text-[#c9a84c] hover:text-white transition flex items-center gap-1">
+                      <span className="material-symbols-outlined text-xs">refresh</span> Regenerate
+                    </button>
+                  </div>
+                  <img src={imageUrl} alt="AI Generated Property" className="w-full aspect-video object-cover" />
+                </div>
+
+                {videoUrl ? (
+                  <div className="relative rounded-lg overflow-hidden border border-[#c9a84c]/20">
+                    <div className="flex items-center justify-between px-3 py-2 bg-[#0a0e1a]">
+                      <span className="text-xs font-semibold text-white/70 flex items-center gap-1"><span className="material-symbols-outlined text-xs text-[#c9a84c]">movie_creation</span> AI Cinematic Video</span>
+                      <button type="button" onClick={handleGenerateVideo} className="text-xs text-[#c9a84c] hover:text-white transition flex items-center gap-1">
+                        <span className="material-symbols-outlined text-xs">refresh</span> Regenerate
+                      </button>
+                    </div>
+                    <video src={videoUrl} controls autoPlay loop muted className="w-full aspect-video object-cover" />
+                  </div>
+                ) : (
+                  <button type="button" onClick={handleGenerateVideo} className="w-full px-4 py-3 rounded border-2 border-dashed border-[#c9a84c]/30 text-[#c9a84c] hover:border-[#c9a84c]/60 hover:bg-[#c9a84c]/5 transition flex items-center justify-center gap-2">
+                    <span className="material-symbols-outlined text-sm">movie_creation</span>
+                    Generate Cinematic Video from Image
+                  </button>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Error Messages */}

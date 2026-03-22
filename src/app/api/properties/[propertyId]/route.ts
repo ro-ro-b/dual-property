@@ -60,6 +60,8 @@ function mapObjectToProperty(obj: any, id: string) {
     expenses: fin.annualExpenses,
     capRate: fin.capRate,
     projectedReturn: fin.projectedAppreciation,
+    imageUrl: custom.imageUrl || '',
+    videoUrl: custom.videoUrl || '',
     contractAddress: '0x41Cf00E593c5623B00F812bC70Ee1A737C5aFF06',
     integrityHash: obj.integrity_hash,
     ownerAddress: obj.owner_id || obj.owner,
