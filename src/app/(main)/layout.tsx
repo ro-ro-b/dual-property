@@ -26,7 +26,7 @@ export default function PropertyLayout({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             {/* Logo */}
-            <Link href="/property" className="flex items-center gap-3 group">
+            <Link href="/" className="flex items-center gap-3 group">
               <div className="w-10 h-10 bg-gradient-to-br from-[#c9a84c] to-[#a68832] rounded-xl flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300">
                 <span className="material-symbols-outlined text-[#0a0e1a] text-xl">
                   domain
@@ -43,28 +43,28 @@ export default function PropertyLayout({
             {/* Desktop Nav Links */}
             <div className="hidden md:flex items-center gap-8">
               <Link
-                href="/property"
+                href="/"
                 className="text-sm font-medium text-white/70 hover:text-white transition-colors duration-200 relative group"
               >
                 Properties
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-[#c9a84c] to-transparent group-hover:w-full transition-all duration-300" />
               </Link>
               <Link
-                href="/property/portfolio"
+                href="/portfolio"
                 className="text-sm font-medium text-white/70 hover:text-white transition-colors duration-200 relative group"
               >
                 Portfolio
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-[#c9a84c] to-transparent group-hover:w-full transition-all duration-300" />
               </Link>
               <Link
-                href="/property/trade"
+                href="/trade"
                 className="text-sm font-medium text-white/70 hover:text-white transition-colors duration-200 relative group"
               >
                 Trade
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-[#c9a84c] to-transparent group-hover:w-full transition-all duration-300" />
               </Link>
               <Link
-                href="/property/distribute"
+                href="/distribute"
                 className="text-sm font-medium text-white/70 hover:text-white transition-colors duration-200 relative group"
               >
                 Distribute
@@ -85,25 +85,25 @@ export default function PropertyLayout({
           {mobileMenuOpen && (
             <div className="md:hidden pb-4 border-t border-white/[0.06] pt-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
               <Link
-                href="/property"
+                href="/"
                 className="block text-sm font-medium text-white/70 hover:text-white px-4 py-2 rounded-lg hover:bg-white/[0.05] transition-colors"
               >
                 Properties
               </Link>
               <Link
-                href="/property/portfolio"
+                href="/portfolio"
                 className="block text-sm font-medium text-white/70 hover:text-white px-4 py-2 rounded-lg hover:bg-white/[0.05] transition-colors"
               >
                 Portfolio
               </Link>
               <Link
-                href="/property/trade"
+                href="/trade"
                 className="block text-sm font-medium text-white/70 hover:text-white px-4 py-2 rounded-lg hover:bg-white/[0.05] transition-colors"
               >
                 Trade
               </Link>
               <Link
-                href="/property/distribute"
+                href="/distribute"
                 className="block text-sm font-medium text-white/70 hover:text-white px-4 py-2 rounded-lg hover:bg-white/[0.05] transition-colors"
               >
                 Distribute
@@ -134,10 +134,10 @@ export default function PropertyLayout({
               </h4>
               <ul className="space-y-2 text-xs text-white/50 hover:text-white/70">
                 <li>
-                  <a href="/property">Properties</a>
+                  <a href="/">Properties</a>
                 </li>
                 <li>
-                  <a href="/property/portfolio">Portfolio</a>
+                  <a href="/portfolio">Portfolio</a>
                 </li>
               </ul>
             </div>
