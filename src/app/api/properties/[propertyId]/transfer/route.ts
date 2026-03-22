@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAuthenticatedClient } from "@/lib/dual-auth";
+import { getOrgToken, dualFetch } from "@/lib/get-org-token";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest, { params }: { params: { propertyId: string } }) {
   try {
-    const client = await getAuthenticatedClient();
-    if (!client) {
+    const token = await getOrgToken(req);
+    if (!token) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -17,21 +17,31 @@ export async function POST(req: NextRequest, { params }: { params: { propertyId:
       return NextResponse.json({ error: "recipientEmail is required" }, { status: 400 });
     }
 
-    const result = await client.ebus.execute({
-      action: {
-        custom: {
-          name: "transfer_tokens",
-          object_id: params.propertyId,
-          data: {
-            custom: {
-              recipientEmail,
-              tokenCount: tokenCount || 1,
-              transferredAt: new Date().toISOString(),
+    const res = await dualFetch('/ebus/execute', token, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: {
+          custom: {
+            name: "transfer_tokens",
+            object_id: params.propertyId,
+            data: {
+              custom: {
+                recipientEmail,
+                tokenCount: tokenCount || 1,
+                transferredAt: new Date().toISOString(),
+              },
             },
           },
         },
-      },
+      }),
     });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ message: 'Transfer failed' }));
+      return NextResponse.json({ error: err.message || 'Transfer failed' }, { status: res.status });
+    }
+
+    const result = await res.json();
 
     return NextResponse.json({
       success: true,
@@ -41,6 +51,6 @@ export async function POST(req: NextRequest, { params }: { params: { propertyId:
       timestamp: new Date().toISOString(),
     });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Transfer failed" }, { status: err.status || 500 });
+    return NextResponse.json({ error: err.message || "Transfer failed" }, { status: 500 });
   }
 }

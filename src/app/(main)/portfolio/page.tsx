@@ -116,9 +116,15 @@ function PortfolioContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
-      if (response.ok) {
+      const data = await response.json();
+      if (response.ok && data.success) {
         setClaimSuccess(propertyId);
-        setTimeout(() => setClaimSuccess(null), 3000);
+        const amt = data.yieldAmount ? `$${data.yieldAmount.toLocaleString()}` : '';
+        const name = data.propertyName || 'Property';
+        alert(`Yield claimed for ${name}${amt ? ': ' + amt : ''} (${data.period})\nAction ID: ${data.actionId}`);
+        setTimeout(() => setClaimSuccess(null), 5000);
+      } else {
+        alert('Claim failed: ' + (data.error || 'Unknown error'));
       }
     } catch {
       alert('Error claiming yield');
@@ -137,8 +143,8 @@ function PortfolioContent() {
         body: JSON.stringify({ recipientEmail: transferEmail }),
       });
       const data = await response.json();
-      if (response.ok) {
-        alert(`Transfer initiated! Transaction: ${data.transactionHash}`);
+      if (response.ok && data.success) {
+        alert(`Transfer initiated to ${data.transferredTo}!\nAction ID: ${data.actionId}`);
         setShowTransferModal(null);
         setTransferEmail('');
       } else {
