@@ -43,6 +43,7 @@ function PortfolioContent() {
   const [loading, setLoading] = useState(true);
   const [claimingId, setClaimingId] = useState<string | null>(null);
   const [claimSuccess, setClaimSuccess] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showTransferModal, setShowTransferModal] = useState<string | null>(null);
   const [transferEmail, setTransferEmail] = useState('');
   const [transferring, setTransferring] = useState(false);
@@ -121,20 +122,22 @@ function PortfolioContent() {
         setClaimSuccess(propertyId);
         const amt = data.yieldAmount ? `$${data.yieldAmount.toLocaleString()}` : '';
         const name = data.propertyName || 'Property';
-        alert(`Yield claimed for ${name}${amt ? ': ' + amt : ''} (${data.period})\nAction ID: ${data.actionId}`);
-        setTimeout(() => setClaimSuccess(null), 5000);
+        setToastMessage(`Yield claimed for ${name}${amt ? ': ' + amt : ''} (${data.period})`);
+        setTimeout(() => { setClaimSuccess(null); setToastMessage(null); }, 6000);
       } else {
-        alert('Claim failed: ' + (data.error || 'Unknown error'));
+        setToastMessage('Claim failed: ' + (data.error || 'Unknown error'));
+        setTimeout(() => setToastMessage(null), 5000);
       }
     } catch {
-      alert('Error claiming yield');
+      setToastMessage('Error claiming yield');
+      setTimeout(() => setToastMessage(null), 5000);
     } finally {
       setClaimingId(null);
     }
   };
 
   const handleTransfer = async (propertyId: string) => {
-    if (!transferEmail) { alert('Please enter an email address'); return; }
+    if (!transferEmail) { setToastMessage('Please enter an email address'); setTimeout(() => setToastMessage(null), 3000); return; }
     setTransferring(true);
     try {
       const response = await fetch(`/api/properties/${propertyId}/transfer`, {
@@ -144,14 +147,14 @@ function PortfolioContent() {
       });
       const data = await response.json();
       if (response.ok && data.success) {
-        alert(`Transfer initiated to ${data.transferredTo}!\nAction ID: ${data.actionId}`);
+        setToastMessage(`Transfer initiated to ${data.transferredTo}`);
         setShowTransferModal(null);
         setTransferEmail('');
       } else {
-        alert('Transfer failed: ' + data.error);
+        setToastMessage('Transfer failed: ' + data.error);
       }
     } catch {
-      alert('Error processing transfer');
+      setToastMessage('Error processing transfer');
     } finally {
       setTransferring(false);
     }
@@ -167,6 +170,26 @@ function PortfolioContent() {
 
   return (
     <div className="min-h-screen bg-[#0a0e1a]">
+      {/* Toast notification */}
+      {toastMessage && (
+        <div className="fixed top-4 right-4 z-50 max-w-md animate-[fadeIn_0.3s_ease-out]">
+          <div className={`px-5 py-3 rounded-xl border shadow-2xl backdrop-blur-sm ${
+            toastMessage.includes('failed') || toastMessage.includes('Error')
+              ? 'bg-red-900/90 border-red-500/50 text-red-100'
+              : 'bg-[#0a0e1a]/95 border-[#10b981]/50 text-white'
+          }`}>
+            <div className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-lg text-[#10b981]">
+                {toastMessage.includes('failed') || toastMessage.includes('Error') ? 'error' : 'check_circle'}
+              </span>
+              <span className="text-sm font-medium">{toastMessage}</span>
+              <button onClick={() => setToastMessage(null)} className="ml-2 text-white/50 hover:text-white">
+                <span className="material-symbols-outlined text-sm">close</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Hero */}
       <div className="relative overflow-hidden pt-12 pb-20">
         <div className="absolute inset-0 opacity-40">
