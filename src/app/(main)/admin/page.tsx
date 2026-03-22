@@ -323,15 +323,15 @@ export default function PropertyAdminPage() {
   if (authState === 'checking') {
     return (
       <div className="flex items-center justify-center py-24">
-        <div className="w-8 h-8 rounded-full border-2 border-gold-dim border-t-transparent animate-spin" />
+        <div className="w-8 h-8 rounded-full border-2 border-[#c9a84c] border-t-transparent animate-spin" />
       </div>
     );
   }
 
   if (authState === 'unauthenticated' || authState === 'otp_sent') {
     return (
-      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-navy-dark to-navy-light">
-        <div className="w-full max-w-md p-8 rounded-lg bg-card-dark border border-gold-dim/20">
+      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-[#0a0e1a] to-[#111827]">
+        <div className="w-full max-w-md p-8 rounded-lg bg-[#111827] border border-[#c9a84c]/20">
           <h1 className="text-2xl font-semibold text-white mb-2">Admin Authentication</h1>
           <p className="text-gray-400 text-sm mb-6">Verify your email to manage property tokens.</p>
 
@@ -348,12 +348,12 @@ export default function PropertyAdminPage() {
                 placeholder="your@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 rounded bg-navy-light border border-gold-dim/20 text-white placeholder-gray-500 focus:outline-none focus:border-gold-bright"
+                className="w-full px-4 py-2 rounded bg-[#0a0e1a] border border-[#c9a84c]/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#c9a84c]"
               />
               <button
                 onClick={handleSendOtp}
                 disabled={!email || authLoading}
-                className="w-full px-4 py-2 rounded bg-gradient-to-r from-gold-bright to-gold-dim text-navy-dark font-semibold hover:shadow-lg hover:shadow-gold-bright/50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                className="w-full px-4 py-2 rounded bg-gradient-to-r from-[#c9a84c] to-[#a68832] text-[#0a0e1a] font-semibold hover:shadow-lg hover:shadow-[#c9a84c]/50 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
                 {authLoading ? 'Sending...' : 'Send OTP'}
               </button>
@@ -367,12 +367,12 @@ export default function PropertyAdminPage() {
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
                 maxLength={6}
-                className="w-full px-4 py-2 rounded bg-navy-light border border-gold-dim/20 text-white placeholder-gray-500 focus:outline-none focus:border-gold-bright text-center text-lg tracking-widest"
+                className="w-full px-4 py-2 rounded bg-[#0a0e1a] border border-[#c9a84c]/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#c9a84c] text-center text-lg tracking-widest"
               />
               <button
                 onClick={handleLogin}
                 disabled={!otp || authLoading}
-                className="w-full px-4 py-2 rounded bg-gradient-to-r from-gold-bright to-gold-dim text-navy-dark font-semibold hover:shadow-lg hover:shadow-gold-bright/50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                className="w-full px-4 py-2 rounded bg-gradient-to-r from-[#c9a84c] to-[#a68832] text-[#0a0e1a] font-semibold hover:shadow-lg hover:shadow-[#c9a84c]/50 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
                 {authLoading ? 'Verifying...' : 'Verify'}
               </button>
@@ -381,7 +381,7 @@ export default function PropertyAdminPage() {
                   setAuthState('unauthenticated');
                   setOtp('');
                 }}
-                className="w-full text-gray-400 text-sm hover:text-gold-bright transition"
+                className="w-full text-gray-400 text-sm hover:text-[#c9a84c] transition"
               >
                 Change email
               </button>
@@ -395,7 +395,7 @@ export default function PropertyAdminPage() {
   // ── Minting Phase ──
   if (mintPhase === 'minting') {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-navy-dark to-navy-light p-4">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-[#0a0e1a] to-[#111827] p-4">
         <div className="w-full max-w-2xl">
           <div className="space-y-4">
             {mintSteps.map((step, idx) => (
@@ -403,19 +403,19 @@ export default function PropertyAdminPage() {
                 <div className={`p-4 rounded-lg border transition ${
                   step.status === 'done' ? 'bg-green-900/20 border-green-500/30' :
                   step.status === 'error' ? 'bg-red-900/20 border-red-500/30' :
-                  step.status === 'active' ? 'bg-gold-bright/10 border-gold-bright/30' :
-                  'bg-card-dark border-gold-dim/20'
+                  step.status === 'active' ? 'bg-[#c9a84c]/10 border-[#c9a84c]/30' :
+                  'bg-[#111827] border-[#c9a84c]/20'
                 }`}>
                   <div className="flex items-start gap-4">
                     <div className={`mt-1 w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
                       step.status === 'done' ? 'bg-green-500' :
                       step.status === 'error' ? 'bg-red-500' :
-                      step.status === 'active' ? 'bg-gold-bright animate-pulse' :
+                      step.status === 'active' ? 'bg-[#c9a84c] animate-pulse' :
                       'bg-gray-600'
                     }`}>
                       {step.status === 'done' && <span className="text-white text-sm">✓</span>}
                       {step.status === 'error' && <span className="text-white text-sm">!</span>}
-                      {step.status === 'active' && <span className="w-2 h-2 bg-navy-dark rounded-full animate-bounce" />}
+                      {step.status === 'active' && <span className="w-2 h-2 bg-[#0a0e1a] rounded-full animate-bounce" />}
                       {step.status === 'pending' && <span className="text-white text-xs">-</span>}
                     </div>
                     <div className="flex-1">
@@ -428,7 +428,7 @@ export default function PropertyAdminPage() {
                   <div className={`h-2 ml-3 border-l-2 ${
                     step.status === 'done' ? 'border-green-500' :
                     step.status === 'error' ? 'border-red-500' :
-                    'border-gold-dim/30'
+                    'border-[#c9a84c]/30'
                   }`} />
                 )}
               </div>
@@ -455,7 +455,7 @@ export default function PropertyAdminPage() {
   // ── Success Phase ──
   if (mintPhase === 'success') {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-navy-dark to-navy-light p-4">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-[#0a0e1a] to-[#111827] p-4">
         <div className="w-full max-w-2xl">
           <div className="text-center mb-8">
             <div className="w-16 h-16 rounded-full bg-green-500/20 border-2 border-green-500 flex items-center justify-center mx-auto mb-6">
@@ -467,17 +467,17 @@ export default function PropertyAdminPage() {
 
           {mintResult && (
             <div className="space-y-4 mb-8">
-              <div className="p-4 rounded-lg bg-card-dark border border-gold-dim/30">
+              <div className="p-4 rounded-lg bg-[#111827] border border-[#c9a84c]/30">
                 <p className="text-gray-400 text-sm mb-1">Action ID</p>
                 <p className="text-white font-mono text-sm break-all">{mintResult.actionId}</p>
               </div>
 
               {mintResult.objectIds.length > 0 && (
-                <div className="p-4 rounded-lg bg-card-dark border border-gold-dim/30">
+                <div className="p-4 rounded-lg bg-[#111827] border border-[#c9a84c]/30">
                   <p className="text-gray-400 text-sm mb-2">Property Token ID{mintResult.objectIds.length > 1 ? 's' : ''}</p>
                   <div className="space-y-2">
                     {mintResult.objectIds.map((id, idx) => (
-                      <p key={idx} className="text-gold-bright font-mono text-sm break-all">
+                      <p key={idx} className="text-[#c9a84c] font-mono text-sm break-all">
                         {id}
                       </p>
                     ))}
@@ -515,13 +515,13 @@ export default function PropertyAdminPage() {
                 });
                 setMintResult(null);
               }}
-              className="flex-1 px-6 py-3 rounded bg-gradient-to-r from-gold-bright to-gold-dim text-navy-dark font-semibold hover:shadow-lg hover:shadow-gold-bright/50 transition"
+              className="flex-1 px-6 py-3 rounded bg-gradient-to-r from-[#c9a84c] to-[#a68832] text-[#0a0e1a] font-semibold hover:shadow-lg hover:shadow-[#c9a84c]/50 transition"
             >
               Mint Another
             </button>
             <Link
               href="/property"
-              className="flex-1 px-6 py-3 rounded border border-gold-dim text-gold-bright font-semibold hover:bg-gold-dim/10 transition text-center"
+              className="flex-1 px-6 py-3 rounded border border-[#c9a84c] text-[#c9a84c] font-semibold hover:bg-[#c9a84c]/10 transition text-center"
             >
               View Portfolio
             </Link>
@@ -533,12 +533,12 @@ export default function PropertyAdminPage() {
 
   // ── Form Phase ──
   return (
-    <div className="min-h-screen bg-gradient-to-br from-navy-dark to-navy-light p-4 sm:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#0a0e1a] to-[#111827] p-4 sm:p-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-12">
           <div className="flex items-center gap-3 mb-4">
-            <span className="material-symbols-outlined text-4xl text-gold-bright">
+            <span className="material-symbols-outlined text-4xl text-[#c9a84c]">
               {/* Building icon via material-symbols */}
               &#xe5d8;
             </span>
@@ -552,15 +552,15 @@ export default function PropertyAdminPage() {
 
         {/* Organization Dashboard */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-card-dark rounded-lg border border-gold-dim/20 p-6">
+          <div className="bg-[#111827] rounded-lg border border-[#c9a84c]/20 p-6">
             <p className="text-gray-400 text-sm mb-1">Organization Balance</p>
             <p className="text-2xl font-bold text-white">{orgBalance ? JSON.stringify(orgBalance).slice(0, 30) : 'Loading...'}</p>
           </div>
-          <div className="bg-card-dark rounded-lg border border-gold-dim/20 p-6">
+          <div className="bg-[#111827] rounded-lg border border-[#c9a84c]/20 p-6">
             <p className="text-gray-400 text-sm mb-1">Available Templates</p>
             <p className="text-2xl font-bold text-white">{templates.length}</p>
           </div>
-          <div className="bg-card-dark rounded-lg border border-gold-dim/20 p-6">
+          <div className="bg-[#111827] rounded-lg border border-[#c9a84c]/20 p-6">
             <p className="text-gray-400 text-sm mb-1">Network Status</p>
             <p className="text-2xl font-bold text-green-400 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
@@ -571,27 +571,27 @@ export default function PropertyAdminPage() {
 
         {/* Extended DUAL Module Dashboard */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-12">
-          <div className="bg-card-dark rounded-lg border border-gold-dim/20 p-4">
+          <div className="bg-[#111827] rounded-lg border border-[#c9a84c]/20 p-4">
             <p className="text-gray-500 text-xs mb-1">Webhooks</p>
             <p className="text-xl font-bold text-white">{webhooks.length}</p>
             <p className="text-xs text-gray-500">Active listeners</p>
           </div>
-          <div className="bg-card-dark rounded-lg border border-gold-dim/20 p-4">
+          <div className="bg-[#111827] rounded-lg border border-[#c9a84c]/20 p-4">
             <p className="text-gray-500 text-xs mb-1">Action Types</p>
             <p className="text-xl font-bold text-white">{actionTypes.length}</p>
             <p className="text-xs text-gray-500">Custom actions</p>
           </div>
-          <div className="bg-card-dark rounded-lg border border-gold-dim/20 p-4">
+          <div className="bg-[#111827] rounded-lg border border-[#c9a84c]/20 p-4">
             <p className="text-gray-500 text-xs mb-1">Faces</p>
             <p className="text-xl font-bold text-white">{faces.length}</p>
             <p className="text-xs text-gray-500">Token media</p>
           </div>
-          <div className="bg-card-dark rounded-lg border border-gold-dim/20 p-4">
+          <div className="bg-[#111827] rounded-lg border border-[#c9a84c]/20 p-4">
             <p className="text-gray-500 text-xs mb-1">Batches</p>
             <p className="text-xl font-bold text-white">{batches.length}</p>
             <p className="text-xs text-gray-500">Sequencer jobs</p>
           </div>
-          <div className="bg-card-dark rounded-lg border border-gold-dim/20 p-4">
+          <div className="bg-[#111827] rounded-lg border border-[#c9a84c]/20 p-4">
             <p className="text-gray-500 text-xs mb-1">Payments</p>
             <p className="text-xl font-bold text-white">{paymentConfig ? 'Active' : '-'}</p>
             <p className="text-xs text-gray-500">Config status</p>
@@ -599,9 +599,9 @@ export default function PropertyAdminPage() {
         </div>
 
         {/* Webhook Auto-Registration Panel */}
-        <div className="bg-card-dark rounded-lg border border-gold-dim/20 p-6 mb-8">
+        <div className="bg-[#111827] rounded-lg border border-[#c9a84c]/20 p-6 mb-8">
           <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-gold-bright">webhook</span>
+            <span className="material-symbols-outlined text-[#c9a84c]">webhook</span>
             Webhook Auto-Registration
           </h2>
           <p className="text-gray-400 text-sm mb-4">
@@ -613,7 +613,7 @@ export default function PropertyAdminPage() {
               value={webhookUrl}
               onChange={(e) => setWebhookUrl(e.target.value)}
               placeholder="https://your-domain.com/api/webhooks/receive"
-              className="flex-1 px-4 py-2 rounded bg-navy-light border border-gold-dim/20 text-white placeholder-gray-500 focus:outline-none focus:border-gold-bright transition"
+              className="flex-1 px-4 py-2 rounded bg-[#0a0e1a] border border-[#c9a84c]/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#c9a84c] transition"
             />
             <button
               onClick={async () => {
@@ -640,7 +640,7 @@ export default function PropertyAdminPage() {
                 }
               }}
               disabled={webhookRegistering || !webhookUrl}
-              className="px-6 py-2 rounded bg-gradient-to-r from-gold-bright to-gold-dim text-navy-dark font-semibold hover:shadow-lg hover:shadow-gold-bright/50 disabled:opacity-50 disabled:cursor-not-allowed transition whitespace-nowrap"
+              className="px-6 py-2 rounded bg-gradient-to-r from-[#c9a84c] to-[#a68832] text-[#0a0e1a] font-semibold hover:shadow-lg hover:shadow-[#c9a84c]/50 disabled:opacity-50 disabled:cursor-not-allowed transition whitespace-nowrap"
             >
               {webhookRegistering ? 'Registering...' : 'Auto-Register All'}
             </button>
@@ -653,7 +653,7 @@ export default function PropertyAdminPage() {
             </div>
           )}
           {webhooks.length > 0 && (
-            <div className="mt-4 pt-4 border-t border-gold-dim/10">
+            <div className="mt-4 pt-4 border-t border-[#c9a84c]/10">
               <p className="text-xs text-gray-500 mb-2">Active Webhooks ({webhooks.length})</p>
               <div className="space-y-1 max-h-32 overflow-y-auto">
                 {webhooks.map((wh: any, i: number) => (
@@ -669,9 +669,9 @@ export default function PropertyAdminPage() {
         </div>
 
         {/* Sequencer Workflow Builder */}
-        <div className="bg-card-dark rounded-lg border border-gold-dim/20 p-6 mb-8">
+        <div className="bg-[#111827] rounded-lg border border-[#c9a84c]/20 p-6 mb-8">
           <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-gold-bright">reorder</span>
+            <span className="material-symbols-outlined text-[#c9a84c]">reorder</span>
             Sequencer Workflow Builder
           </h2>
           <p className="text-gray-400 text-sm mb-4">
@@ -680,7 +680,7 @@ export default function PropertyAdminPage() {
           <div className="space-y-3 mb-4">
             {sequencerActions.map((action, i) => (
               <div key={i} className="flex gap-3 items-start">
-                <span className="text-gold-bright font-mono text-sm mt-2 w-6">{i + 1}.</span>
+                <span className="text-[#c9a84c] font-mono text-sm mt-2 w-6">{i + 1}.</span>
                 <select
                   value={action.type}
                   onChange={(e) => {
@@ -688,7 +688,7 @@ export default function PropertyAdminPage() {
                     updated[i].type = e.target.value;
                     setSequencerActions(updated);
                   }}
-                  className="px-3 py-2 rounded bg-navy-light border border-gold-dim/20 text-white text-sm focus:outline-none focus:border-gold-bright transition"
+                  className="px-3 py-2 rounded bg-[#0a0e1a] border border-[#c9a84c]/20 text-white text-sm focus:outline-none focus:border-[#c9a84c] transition"
                 >
                   <option value="mint">Mint</option>
                   <option value="transfer">Transfer</option>
@@ -704,7 +704,7 @@ export default function PropertyAdminPage() {
                     setSequencerActions(updated);
                   }}
                   placeholder='{"objectId": "...", "amount": 1}'
-                  className="flex-1 px-3 py-2 rounded bg-navy-light border border-gold-dim/20 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-gold-bright transition font-mono"
+                  className="flex-1 px-3 py-2 rounded bg-[#0a0e1a] border border-[#c9a84c]/20 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-[#c9a84c] transition font-mono"
                 />
                 {sequencerActions.length > 1 && (
                   <button
@@ -720,7 +720,7 @@ export default function PropertyAdminPage() {
           <div className="flex gap-3">
             <button
               onClick={() => setSequencerActions([...sequencerActions, { type: 'mint', data: '' }])}
-              className="px-4 py-2 rounded border border-gold-dim/30 text-gold-bright text-sm hover:bg-gold-dim/10 transition"
+              className="px-4 py-2 rounded border border-[#c9a84c]/30 text-[#c9a84c] text-sm hover:bg-[#c9a84c]/10 transition"
             >
               + Add Step
             </button>
@@ -747,7 +747,7 @@ export default function PropertyAdminPage() {
                 }
               }}
               disabled={sequencerRunning}
-              className="px-6 py-2 rounded bg-gradient-to-r from-gold-bright to-gold-dim text-navy-dark font-semibold hover:shadow-lg hover:shadow-gold-bright/50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              className="px-6 py-2 rounded bg-gradient-to-r from-[#c9a84c] to-[#a68832] text-[#0a0e1a] font-semibold hover:shadow-lg hover:shadow-[#c9a84c]/50 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
               {sequencerRunning ? 'Executing...' : 'Execute Sequence'}
             </button>
@@ -763,14 +763,14 @@ export default function PropertyAdminPage() {
 
         {/* Template Selector */}
         {templates.length > 0 && (
-          <div className="bg-card-dark rounded-lg border border-gold-dim/20 p-6 mb-8">
+          <div className="bg-[#111827] rounded-lg border border-[#c9a84c]/20 p-6 mb-8">
             <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-              <span className="text-gold-bright">📋</span> Select Template
+              <span className="text-[#c9a84c]">📋</span> Select Template
             </h2>
             <select
               value={selectedTemplate}
               onChange={(e) => setSelectedTemplate(e.target.value)}
-              className="w-full px-4 py-2 rounded bg-navy-light border border-gold-dim/20 text-white focus:outline-none focus:border-gold-bright transition"
+              className="w-full px-4 py-2 rounded bg-[#0a0e1a] border border-[#c9a84c]/20 text-white focus:outline-none focus:border-[#c9a84c] transition"
             >
               {templates.map((t: any) => (
                 <option key={t.id} value={t.id}>{t.name} — {t.description || 'No description'}</option>
@@ -782,9 +782,9 @@ export default function PropertyAdminPage() {
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Property Information Section */}
-          <div className="bg-card-dark rounded-lg border border-gold-dim/20 p-6">
+          <div className="bg-[#111827] rounded-lg border border-[#c9a84c]/20 p-6">
             <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-              <span className="text-gold-bright">📍</span> Property Information
+              <span className="text-[#c9a84c]">📍</span> Property Information
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -795,7 +795,7 @@ export default function PropertyAdminPage() {
                   value={form.name}
                   onChange={(e) => update('name', e.target.value)}
                   required
-                  className="w-full px-4 py-2 rounded bg-navy-light border border-gold-dim/20 text-white placeholder-gray-500 focus:outline-none focus:border-gold-bright transition"
+                  className="w-full px-4 py-2 rounded bg-[#0a0e1a] border border-[#c9a84c]/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#c9a84c] transition"
                   placeholder="e.g., Sunset Hills Luxury Apartments"
                 />
               </div>
@@ -807,7 +807,7 @@ export default function PropertyAdminPage() {
                   value={form.address}
                   onChange={(e) => update('address', e.target.value)}
                   required
-                  className="w-full px-4 py-2 rounded bg-navy-light border border-gold-dim/20 text-white placeholder-gray-500 focus:outline-none focus:border-gold-bright transition"
+                  className="w-full px-4 py-2 rounded bg-[#0a0e1a] border border-[#c9a84c]/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#c9a84c] transition"
                   placeholder="123 Oak Street"
                 />
               </div>
@@ -819,7 +819,7 @@ export default function PropertyAdminPage() {
                   value={form.city}
                   onChange={(e) => update('city', e.target.value)}
                   required
-                  className="w-full px-4 py-2 rounded bg-navy-light border border-gold-dim/20 text-white placeholder-gray-500 focus:outline-none focus:border-gold-bright transition"
+                  className="w-full px-4 py-2 rounded bg-[#0a0e1a] border border-[#c9a84c]/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#c9a84c] transition"
                   placeholder="San Francisco"
                 />
               </div>
@@ -831,7 +831,7 @@ export default function PropertyAdminPage() {
                   value={form.country}
                   onChange={(e) => update('country', e.target.value)}
                   required
-                  className="w-full px-4 py-2 rounded bg-navy-light border border-gold-dim/20 text-white placeholder-gray-500 focus:outline-none focus:border-gold-bright transition"
+                  className="w-full px-4 py-2 rounded bg-[#0a0e1a] border border-[#c9a84c]/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#c9a84c] transition"
                   placeholder="United States"
                 />
               </div>
@@ -841,7 +841,7 @@ export default function PropertyAdminPage() {
                 <select
                   value={form.propertyType}
                   onChange={(e) => update('propertyType', e.target.value)}
-                  className="w-full px-4 py-2 rounded bg-navy-light border border-gold-dim/20 text-white focus:outline-none focus:border-gold-bright transition"
+                  className="w-full px-4 py-2 rounded bg-[#0a0e1a] border border-[#c9a84c]/20 text-white focus:outline-none focus:border-[#c9a84c] transition"
                 >
                   <option value="residential">Residential</option>
                   <option value="commercial">Commercial</option>
@@ -857,7 +857,7 @@ export default function PropertyAdminPage() {
                   value={form.yearBuilt}
                   onChange={(e) => update('yearBuilt', parseInt(e.target.value) || 0)}
                   required
-                  className="w-full px-4 py-2 rounded bg-navy-light border border-gold-dim/20 text-white placeholder-gray-500 focus:outline-none focus:border-gold-bright transition"
+                  className="w-full px-4 py-2 rounded bg-[#0a0e1a] border border-[#c9a84c]/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#c9a84c] transition"
                   placeholder="2020"
                 />
               </div>
@@ -869,7 +869,7 @@ export default function PropertyAdminPage() {
                   value={form.totalSqft}
                   onChange={(e) => update('totalSqft', parseFloat(e.target.value) || 0)}
                   required
-                  className="w-full px-4 py-2 rounded bg-navy-light border border-gold-dim/20 text-white placeholder-gray-500 focus:outline-none focus:border-gold-bright transition"
+                  className="w-full px-4 py-2 rounded bg-[#0a0e1a] border border-[#c9a84c]/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#c9a84c] transition"
                   placeholder="50000"
                 />
               </div>
@@ -881,7 +881,7 @@ export default function PropertyAdminPage() {
                   value={form.numberOfUnits}
                   onChange={(e) => update('numberOfUnits', parseInt(e.target.value) || 1)}
                   required
-                  className="w-full px-4 py-2 rounded bg-navy-light border border-gold-dim/20 text-white placeholder-gray-500 focus:outline-none focus:border-gold-bright transition"
+                  className="w-full px-4 py-2 rounded bg-[#0a0e1a] border border-[#c9a84c]/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#c9a84c] transition"
                   placeholder="12"
                 />
               </div>
@@ -893,7 +893,7 @@ export default function PropertyAdminPage() {
                 value={form.description}
                 onChange={(e) => update('description', e.target.value)}
                 rows={4}
-                className="w-full px-4 py-2 rounded bg-navy-light border border-gold-dim/20 text-white placeholder-gray-500 focus:outline-none focus:border-gold-bright transition resize-none"
+                className="w-full px-4 py-2 rounded bg-[#0a0e1a] border border-[#c9a84c]/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#c9a84c] transition resize-none"
                 placeholder="A detailed description of the property..."
               />
             </div>
@@ -904,16 +904,16 @@ export default function PropertyAdminPage() {
                 value={form.keyFeatures}
                 onChange={(e) => update('keyFeatures', e.target.value)}
                 rows={2}
-                className="w-full px-4 py-2 rounded bg-navy-light border border-gold-dim/20 text-white placeholder-gray-500 focus:outline-none focus:border-gold-bright transition resize-none"
+                className="w-full px-4 py-2 rounded bg-[#0a0e1a] border border-[#c9a84c]/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#c9a84c] transition resize-none"
                 placeholder="e.g., Smart Home Technology, Rooftop Garden, 24/7 Security"
               />
             </div>
           </div>
 
           {/* Investment Structure Section */}
-          <div className="bg-card-dark rounded-lg border border-gold-dim/20 p-6">
+          <div className="bg-[#111827] rounded-lg border border-[#c9a84c]/20 p-6">
             <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-              <span className="text-gold-bright">💎</span> Investment Structure
+              <span className="text-[#c9a84c]">💎</span> Investment Structure
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -924,7 +924,7 @@ export default function PropertyAdminPage() {
                   value={form.totalPropertyValue}
                   onChange={(e) => update('totalPropertyValue', parseFloat(e.target.value) || 0)}
                   required
-                  className="w-full px-4 py-2 rounded bg-navy-light border border-gold-dim/20 text-white placeholder-gray-500 focus:outline-none focus:border-gold-bright transition"
+                  className="w-full px-4 py-2 rounded bg-[#0a0e1a] border border-[#c9a84c]/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#c9a84c] transition"
                   placeholder="10000000"
                 />
               </div>
@@ -937,7 +937,7 @@ export default function PropertyAdminPage() {
                   value={form.tokenPricePerShare}
                   onChange={(e) => update('tokenPricePerShare', parseFloat(e.target.value) || 0)}
                   required
-                  className="w-full px-4 py-2 rounded bg-navy-light border border-gold-dim/20 text-white placeholder-gray-500 focus:outline-none focus:border-gold-bright transition"
+                  className="w-full px-4 py-2 rounded bg-[#0a0e1a] border border-[#c9a84c]/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#c9a84c] transition"
                   placeholder="100.00"
                 />
               </div>
@@ -949,7 +949,7 @@ export default function PropertyAdminPage() {
                   value={form.totalTokens}
                   onChange={(e) => update('totalTokens', parseInt(e.target.value) || 0)}
                   required
-                  className="w-full px-4 py-2 rounded bg-navy-light border border-gold-dim/20 text-white placeholder-gray-500 focus:outline-none focus:border-gold-bright transition"
+                  className="w-full px-4 py-2 rounded bg-[#0a0e1a] border border-[#c9a84c]/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#c9a84c] transition"
                   placeholder="100000"
                 />
               </div>
@@ -962,7 +962,7 @@ export default function PropertyAdminPage() {
                   value={form.annualYield}
                   onChange={(e) => update('annualYield', parseFloat(e.target.value) || 0)}
                   required
-                  className="w-full px-4 py-2 rounded bg-navy-light border border-gold-dim/20 text-white placeholder-gray-500 focus:outline-none focus:border-gold-bright transition"
+                  className="w-full px-4 py-2 rounded bg-[#0a0e1a] border border-[#c9a84c]/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#c9a84c] transition"
                   placeholder="6.5"
                 />
               </div>
@@ -974,7 +974,7 @@ export default function PropertyAdminPage() {
                   value={form.minimumInvestment}
                   onChange={(e) => update('minimumInvestment', parseFloat(e.target.value) || 0)}
                   required
-                  className="w-full px-4 py-2 rounded bg-navy-light border border-gold-dim/20 text-white placeholder-gray-500 focus:outline-none focus:border-gold-bright transition"
+                  className="w-full px-4 py-2 rounded bg-[#0a0e1a] border border-[#c9a84c]/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#c9a84c] transition"
                   placeholder="10000"
                 />
               </div>
@@ -982,9 +982,9 @@ export default function PropertyAdminPage() {
           </div>
 
           {/* Financial Details Section */}
-          <div className="bg-card-dark rounded-lg border border-gold-dim/20 p-6">
+          <div className="bg-[#111827] rounded-lg border border-[#c9a84c]/20 p-6">
             <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-              <span className="text-gold-bright">📊</span> Financial Details
+              <span className="text-[#c9a84c]">📊</span> Financial Details
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -995,7 +995,7 @@ export default function PropertyAdminPage() {
                   value={form.monthlyRentalIncome}
                   onChange={(e) => update('monthlyRentalIncome', parseFloat(e.target.value) || 0)}
                   required
-                  className="w-full px-4 py-2 rounded bg-navy-light border border-gold-dim/20 text-white placeholder-gray-500 focus:outline-none focus:border-gold-bright transition"
+                  className="w-full px-4 py-2 rounded bg-[#0a0e1a] border border-[#c9a84c]/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#c9a84c] transition"
                   placeholder="50000"
                 />
               </div>
@@ -1007,7 +1007,7 @@ export default function PropertyAdminPage() {
                   value={form.annualExpenses}
                   onChange={(e) => update('annualExpenses', parseFloat(e.target.value) || 0)}
                   required
-                  className="w-full px-4 py-2 rounded bg-navy-light border border-gold-dim/20 text-white placeholder-gray-500 focus:outline-none focus:border-gold-bright transition"
+                  className="w-full px-4 py-2 rounded bg-[#0a0e1a] border border-[#c9a84c]/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#c9a84c] transition"
                   placeholder="300000"
                 />
               </div>
@@ -1019,7 +1019,7 @@ export default function PropertyAdminPage() {
                   value={form.netOperatingIncome}
                   onChange={(e) => update('netOperatingIncome', parseFloat(e.target.value) || 0)}
                   required
-                  className="w-full px-4 py-2 rounded bg-navy-light border border-gold-dim/20 text-white placeholder-gray-500 focus:outline-none focus:border-gold-bright transition"
+                  className="w-full px-4 py-2 rounded bg-[#0a0e1a] border border-[#c9a84c]/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#c9a84c] transition"
                   placeholder="300000"
                 />
               </div>
@@ -1032,7 +1032,7 @@ export default function PropertyAdminPage() {
                   value={form.capRate}
                   onChange={(e) => update('capRate', parseFloat(e.target.value) || 0)}
                   required
-                  className="w-full px-4 py-2 rounded bg-navy-light border border-gold-dim/20 text-white placeholder-gray-500 focus:outline-none focus:border-gold-bright transition"
+                  className="w-full px-4 py-2 rounded bg-[#0a0e1a] border border-[#c9a84c]/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#c9a84c] transition"
                   placeholder="3.5"
                 />
               </div>
@@ -1045,7 +1045,7 @@ export default function PropertyAdminPage() {
                   value={form.projectedAppreciation}
                   onChange={(e) => update('projectedAppreciation', parseFloat(e.target.value) || 0)}
                   required
-                  className="w-full px-4 py-2 rounded bg-navy-light border border-gold-dim/20 text-white placeholder-gray-500 focus:outline-none focus:border-gold-bright transition"
+                  className="w-full px-4 py-2 rounded bg-[#0a0e1a] border border-[#c9a84c]/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#c9a84c] transition"
                   placeholder="2.0"
                 />
               </div>
@@ -1064,13 +1064,13 @@ export default function PropertyAdminPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="flex-1 px-6 py-3 rounded bg-gradient-to-r from-gold-bright to-gold-dim text-navy-dark font-semibold hover:shadow-lg hover:shadow-gold-bright/50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              className="flex-1 px-6 py-3 rounded bg-gradient-to-r from-[#c9a84c] to-[#a68832] text-[#0a0e1a] font-semibold hover:shadow-lg hover:shadow-[#c9a84c]/50 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
               {submitting ? 'Tokenizing...' : 'Tokenize Property'}
             </button>
             <Link
               href="/property"
-              className="px-6 py-3 rounded border border-gold-dim text-gold-bright font-semibold hover:bg-gold-dim/10 transition"
+              className="px-6 py-3 rounded border border-[#c9a84c] text-[#c9a84c] font-semibold hover:bg-[#c9a84c]/10 transition"
             >
               Cancel
             </Link>
