@@ -55,7 +55,7 @@ export default function NotificationBell() {
   }, []);
 
   const markRead = async (id: string) => {
-    setReadIds(prev => new Set([...prev, id]));
+    setReadIds(prev => { const next = new Set(Array.from(prev)); next.add(id); return next; });
     setUnreadCount(prev => Math.max(0, prev - 1));
     try {
       await fetch('/api/notifications', {
@@ -67,8 +67,8 @@ export default function NotificationBell() {
   };
 
   const markAllRead = async () => {
-    const allIds = new Set(notifications.map(n => n.id));
-    setReadIds(prev => new Set([...prev, ...allIds]));
+    const allIds = notifications.map(n => n.id);
+    setReadIds(prev => { const next = new Set(Array.from(prev)); allIds.forEach(id => next.add(id)); return next; });
     setUnreadCount(0);
     try {
       await fetch('/api/notifications', {

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getDualClient } from "@/lib/data-provider";
+import { getDualClient } from "@/lib/dual-client";
 
 export const dynamic = "force-dynamic";
 
