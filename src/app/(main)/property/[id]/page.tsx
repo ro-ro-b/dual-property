@@ -7,7 +7,7 @@ interface Property {
   id: string;
   name: string;
   location: string;
-  type: 'Residential' | 'Commercial' | 'Mixed-Use' | 'Hospitality';
+  type: string;
   totalValue: number;
   tokenPrice: number;
   yieldPercent: number;
@@ -25,274 +25,169 @@ interface Property {
   contractAddress?: string;
   integrityHash?: string;
   ownerAddress?: string;
+  blockscoutUrl?: string;
+  tokenCount?: number;
+  metadata?: Record<string, any>;
 }
 
-const mockProperties: Record<string, Property> = {
-  'elysian-tower': {
-    id: 'elysian-tower',
-    name: 'The Elysian Tower',
-    location: '432 Park Avenue, Manhattan, New York',
-    type: 'Residential',
-    totalValue: 247500000,
-    tokenPrice: 125.45,
-    yieldPercent: 6.8,
-    fundedPercent: 94,
-    sqft: 425000,
-    imageGradient: 'from-amber-900 via-orange-800 to-red-900',
-    yearBuilt: 2015,
-    units: 428,
-    description:
-      'A stunning residential tower in the heart of Manhattan offering unparalleled luxury and investment returns. Premium finishes, world-class amenities, and exceptional location.',
-    features: [
-      'Rooftop infinity pool',
-      'Private cinema',
-      'Concierge service',
-      'Underground parking',
-      'Smart home integration',
-      'Floor-to-ceiling windows',
-    ],
-    rentalIncome: 18500000,
-    expenses: 4200000,
-    capRate: 5.8,
-    projectedReturn: 12.4,
-  },
-  'harbour-view': {
-    id: 'harbour-view',
-    name: 'Harbour View Residences',
-    location: '26 Martin Place, Sydney, Australia',
-    type: 'Residential',
-    totalValue: 189300000,
-    tokenPrice: 98.32,
-    yieldPercent: 7.4,
-    fundedPercent: 88,
-    sqft: 312000,
-    imageGradient: 'from-blue-900 via-cyan-800 to-teal-900',
-    yearBuilt: 2018,
-    units: 284,
-    description:
-      'Iconic Sydney harbour-view complex combining modern architecture with premium amenities. Strong rental demand and capital appreciation.',
-    features: [
-      'Harbour views',
-      'Infinity pool complex',
-      'Yoga studios',
-      'Wine cellar',
-      'Business center',
-      'Waterfront terrace',
-    ],
-    rentalIncome: 14100000,
-    expenses: 3100000,
-    capRate: 5.9,
-    projectedReturn: 11.8,
-  },
-  'boulevard-commerce': {
-    id: 'boulevard-commerce',
-    name: 'Boulevard Commerce Hub',
-    location: '100 Bishopsgate, London, UK',
-    type: 'Commercial',
-    totalValue: 156800000,
-    tokenPrice: 87.6,
-    yieldPercent: 8.1,
-    fundedPercent: 96,
-    sqft: 280000,
-    imageGradient: 'from-slate-800 via-gray-700 to-zinc-800',
-    yearBuilt: 2020,
-    units: 15,
-    description:
-      "Premium commercial office space in London's financial district. Multi-tenant portfolio with strong tenant quality and long lease terms.",
-    features: [
-      'Grade A office space',
-      'Trading floors',
-      'Conference facilities',
-      'Fiber connectivity',
-      'Terraces & gardens',
-      '24/7 security',
-    ],
-    rentalIncome: 12800000,
-    expenses: 2400000,
-    capRate: 6.6,
-    projectedReturn: 13.2,
-  },
-  'emirates-tower': {
-    id: 'emirates-tower',
-    name: 'Emirates Crown Tower',
-    location: 'Downtown Dubai, United Arab Emirates',
-    type: 'Mixed-Use',
-    totalValue: 328750000,
-    tokenPrice: 156.2,
-    yieldPercent: 7.9,
-    fundedPercent: 92,
-    sqft: 580000,
-    imageGradient: 'from-yellow-900 via-amber-800 to-orange-900',
-    yearBuilt: 2019,
-    units: 612,
-    description:
-      'Ultra-luxury mixed-use development with residential, commercial, and hospitality components. Prime Dubai location with exceptional investment dynamics.',
-    features: [
-      'Penthouses & villas',
-      'High-end retail',
-      '5-star hotel',
-      'Spa facilities',
-      'Fine dining',
-      'Smart building systems',
-    ],
-    rentalIncome: 25900000,
-    expenses: 5200000,
-    capRate: 6.3,
-    projectedReturn: 12.1,
-  },
-  'marina-prestige': {
-    id: 'marina-prestige',
-    name: 'Marina Prestige Hotel',
-    location: 'Marina Bay, Singapore',
-    type: 'Hospitality',
-    totalValue: 142500000,
-    tokenPrice: 71.25,
-    yieldPercent: 8.5,
-    fundedPercent: 87,
-    sqft: 198000,
-    imageGradient: 'from-indigo-900 via-blue-800 to-purple-900',
-    yearBuilt: 2017,
-    units: 385,
-    description:
-      "Premium 5-star hotel in Singapore's most prestigious waterfront location. Strong occupancy rates and premium pricing power.",
-    features: [
-      'Luxury rooms & suites',
-      'Rooftop restaurant',
-      'Olympic pool',
-      'Wellness center',
-      'Convention halls',
-      'Waterfront lounge',
-    ],
-    rentalIncome: 12100000,
-    expenses: 2800000,
-    capRate: 6.4,
-    projectedReturn: 13.5,
-  },
-  'ocean-residences': {
-    id: 'ocean-residences',
-    name: 'Ocean Residences Miami',
-    location: 'South Beach, Miami, Florida',
-    type: 'Residential',
-    totalValue: 195600000,
-    tokenPrice: 104.8,
-    yieldPercent: 7.2,
-    fundedPercent: 91,
-    sqft: 356000,
-    imageGradient: 'from-pink-900 via-rose-800 to-red-900',
-    yearBuilt: 2016,
-    units: 312,
-    description:
-      "Luxury beachfront residential complex in Miami's most sought-after location. High appreciation potential with strong rental yields.",
-    features: [
-      'Beach access',
-      'Infinity pools',
-      'Beach club',
-      'Tennis courts',
-      'Spa services',
-      'Ocean views',
-    ],
-    rentalIncome: 14000000,
-    expenses: 3300000,
-    capRate: 5.4,
-    projectedReturn: 11.2,
-  },
-  'fintech-plaza': {
-    id: 'fintech-plaza',
-    name: 'FinTech Plaza',
-    location: 'one-north, Singapore',
-    type: 'Commercial',
-    totalValue: 178900000,
-    tokenPrice: 95.45,
-    yieldPercent: 7.6,
-    fundedPercent: 89,
-    sqft: 320000,
-    imageGradient: 'from-emerald-900 via-green-800 to-teal-900',
-    yearBuilt: 2021,
-    units: 18,
-    description:
-      "State-of-the-art innovation hub for fintech and tech companies. Exceptional location in Singapore's tech corridor with high-quality tenants.",
-    features: [
-      'Co-working spaces',
-      'Innovation labs',
-      'High-speed internet',
-      'Meeting rooms',
-      'Cafes & lounge',
-      'Security & access',
-    ],
-    rentalIncome: 13600000,
-    expenses: 2900000,
-    capRate: 5.9,
-    projectedReturn: 12.3,
-  },
-  'manhattan-luxury': {
-    id: 'manhattan-luxury',
-    name: 'Manhattan Luxury Suites',
-    location: 'Midtown Manhattan, New York',
-    type: 'Hospitality',
-    totalValue: 212400000,
-    tokenPrice: 119.2,
-    yieldPercent: 8.2,
-    fundedPercent: 85,
-    sqft: 234000,
-    imageGradient: 'from-purple-900 via-indigo-800 to-blue-900',
-    yearBuilt: 2014,
-    units: 324,
-    description:
-      'Premium luxury hotel collection in the heart of Manhattan. Premium rates and strong operational performance.',
-    features: [
-      'Suites only',
-      'Michelin restaurant',
-      'Full spa',
-      'Private cinema',
-      'Board rooms',
-      'Concierge',
-    ],
-    rentalIncome: 17400000,
-    expenses: 3800000,
-    capRate: 6.4,
-    projectedReturn: 13.8,
-  },
-};
+interface ProvenanceEvent {
+  id: string;
+  type: string;
+  description: string;
+  timestamp: string;
+  actor?: string;
+  txHash?: string;
+  status: string;
+  data?: Record<string, any>;
+}
+
+interface ActivityEntry {
+  id: string;
+  event: string;
+  hash?: string;
+  amount?: string;
+  timestamp: string;
+  objectId?: string;
+  status: string;
+}
+
+const GRADIENTS = [
+  'from-amber-900 via-orange-800 to-red-900',
+  'from-blue-900 via-cyan-800 to-teal-900',
+  'from-slate-800 via-gray-700 to-zinc-800',
+  'from-yellow-900 via-amber-800 to-orange-900',
+  'from-indigo-900 via-blue-800 to-purple-900',
+  'from-pink-900 via-rose-800 to-red-900',
+  'from-emerald-900 via-green-800 to-teal-900',
+  'from-purple-900 via-indigo-800 to-blue-900',
+];
+
+function hashToGradient(id: string): string {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return GRADIENTS[Math.abs(hash) % GRADIENTS.length];
+}
+
+function timeAgo(timestamp: string): string {
+  const now = Date.now();
+  const then = new Date(timestamp).getTime();
+  const diff = now - then;
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 1) return 'Just now';
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days}d ago`;
+  return new Date(timestamp).toLocaleDateString();
+}
+
+function eventIcon(type: string): string {
+  switch (type.toLowerCase()) {
+    case 'mint': return 'token';
+    case 'transfer': return 'swap_horiz';
+    case 'burn': return 'local_fire_department';
+    case 'custom': return 'build';
+    case 'yield_distribution': return 'payments';
+    case 'list_tokens': return 'storefront';
+    case 'buy_tokens': return 'shopping_cart';
+    default: return 'receipt_long';
+  }
+}
+
+function eventColor(type: string): string {
+  switch (type.toLowerCase()) {
+    case 'mint': return 'text-[#10b981]';
+    case 'transfer': return 'text-[#3b82f6]';
+    case 'burn': return 'text-red-400';
+    case 'buy_tokens': return 'text-[#c9a84c]';
+    case 'yield_distribution': return 'text-[#10b981]';
+    default: return 'text-white/70';
+  }
+}
 
 export default function PropertyDetailPage({
   params,
 }: {
   params: { id: string };
 }) {
-  const mockProperty = mockProperties[params.id];
-  const [property, setProperty] = useState<Property | null>(mockProperty || null);
-  const [apiProperty, setApiProperty] = useState<any>(null);
+  const [property, setProperty] = useState<Property | null>(null);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
-  const [investmentAmount, setInvestmentAmount] = useState(
-    property?.tokenPrice || 0
-  );
+  const [provenance, setProvenance] = useState<ProvenanceEvent[]>([]);
+  const [activity, setActivity] = useState<ActivityEntry[]>([]);
+  const [provenanceLoading, setProvenanceLoading] = useState(false);
+  const [investmentAmount, setInvestmentAmount] = useState(0);
   const [countedValue, setCountedValue] = useState(0);
   const [investLoading, setInvestLoading] = useState(false);
   const [transferLoading, setTransferLoading] = useState(false);
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [transferEmail, setTransferEmail] = useState('');
 
+  // Fetch property data from API
   useEffect(() => {
+    setLoading(true);
     fetch(`/api/properties/${params.id}`)
       .then((r) => r.json())
       .then((data) => {
         if (data.property) {
-          setApiProperty(data.property);
-          // Merge API data with mock data
-          const merged: Property = {
-            ...property!,
-            contractAddress: data.property.contractAddress,
-            integrityHash: data.property.integrityHash,
-            ownerAddress: data.property.ownerAddress,
+          const p = data.property;
+          const prop: Property = {
+            id: p.id || params.id,
+            name: p.name || p.title || 'Untitled Property',
+            location: p.location || p.metadata?.location || 'Location not specified',
+            type: p.type || p.metadata?.type || 'Property',
+            totalValue: p.totalValue || p.metadata?.totalValue || 0,
+            tokenPrice: p.tokenPrice || p.metadata?.tokenPrice || 0,
+            yieldPercent: p.yieldPercent || p.metadata?.yieldPercent || 0,
+            fundedPercent: p.fundedPercent || p.metadata?.fundedPercent || 0,
+            sqft: p.sqft || p.metadata?.sqft || 0,
+            imageGradient: p.imageGradient || hashToGradient(params.id),
+            yearBuilt: p.yearBuilt || p.metadata?.yearBuilt,
+            units: p.units || p.metadata?.units,
+            description: p.description || p.metadata?.description || 'A tokenized real estate property on the DUAL network.',
+            features: p.features || p.metadata?.features || [],
+            rentalIncome: p.rentalIncome || p.metadata?.rentalIncome,
+            expenses: p.expenses || p.metadata?.expenses,
+            capRate: p.capRate || p.metadata?.capRate,
+            projectedReturn: p.projectedReturn || p.metadata?.projectedReturn,
+            contractAddress: p.contractAddress,
+            integrityHash: p.integrityHash,
+            ownerAddress: p.ownerAddress,
+            blockscoutUrl: p.blockscoutUrl,
+            tokenCount: p.tokenCount || p.metadata?.tokenCount,
+            metadata: p.metadata,
           };
-          setProperty(merged);
+          setProperty(prop);
+          setInvestmentAmount(prop.tokenPrice || 100);
         }
       })
-      .catch(() => {
-        // Use mock property
-      });
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, [params.id]);
 
+  // Fetch provenance when on-chain or provenance tab is active
+  useEffect(() => {
+    if (activeTab === 'provenance' || activeTab === 'on-chain') {
+      setProvenanceLoading(true);
+      Promise.all([
+        fetch(`/api/properties/${params.id}/provenance`).then(r => r.json()).catch(() => ({ provenance: [] })),
+        fetch('/api/properties/activity').then(r => r.json()).catch(() => ({ activities: [] })),
+      ]).then(([provData, actData]) => {
+        setProvenance(provData.provenance || []);
+        // Filter activity to this property
+        const allActivity: ActivityEntry[] = actData.activities || [];
+        const propertyActivity = allActivity.filter(
+          (a: ActivityEntry) => a.objectId === params.id || !a.objectId
+        );
+        setActivity(propertyActivity.slice(0, 20));
+      }).finally(() => setProvenanceLoading(false));
+    }
+  }, [activeTab, params.id]);
+
+  // Counter animation
   useEffect(() => {
     if (countedValue < investmentAmount) {
       const timer = setTimeout(() => {
@@ -305,23 +200,25 @@ export default function PropertyDetailPage({
   }, [countedValue, investmentAmount]);
 
   const handleInvest = async () => {
+    if (!property) return;
     setInvestLoading(true);
     try {
-      const response = await fetch('/api/properties', {
+      const response = await fetch(`/api/properties/${params.id}/buy-tokens`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          propertyId: params.id,
-          amount: investmentAmount,
+          listingId: `listing_${params.id}`,
+          buyerEmail: 'investor@example.com',
+          tokenCount: tokens,
         }),
       });
       const data = await response.json();
       if (response.ok) {
-        alert(`Investment successful! Transaction: ${data.transactionHash}`);
+        alert(`Investment successful! Transaction: ${data.transactionHash || data.purchaseId}`);
       } else {
         alert('Investment failed: ' + data.error);
       }
-    } catch (error) {
+    } catch {
       alert('Error processing investment');
     } finally {
       setInvestLoading(false);
@@ -347,13 +244,26 @@ export default function PropertyDetailPage({
       } else {
         alert('Transfer failed: ' + data.error);
       }
-    } catch (error) {
+    } catch {
       alert('Error processing transfer');
     } finally {
       setTransferLoading(false);
     }
   };
 
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0a0e1a] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-2 border-[#c9a84c] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-white/60">Loading property details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Not found state
   if (!property) {
     return (
       <div className="min-h-screen bg-[#0a0e1a] flex items-center justify-center">
@@ -361,8 +271,9 @@ export default function PropertyDetailPage({
           <h1 className="text-4xl font-serif italic text-white mb-4">
             Property not found
           </h1>
+          <p className="text-white/60 mb-6">This property may not exist on the DUAL network yet.</p>
           <Link
-            href="/property"
+            href="/"
             className="px-6 py-3 bg-gradient-to-r from-[#c9a84c] to-[#a68832] text-[#0a0e1a] font-semibold rounded-lg"
           >
             Back to Properties
@@ -372,17 +283,19 @@ export default function PropertyDetailPage({
     );
   }
 
-  const tokens = Math.floor(investmentAmount / property.tokenPrice);
-  const monthlyYield = (investmentAmount * property.yieldPercent) / 100 / 12;
+  const tokens = property.tokenPrice > 0 ? Math.floor(investmentAmount / property.tokenPrice) : 0;
+  const monthlyYield = property.yieldPercent > 0 ? (investmentAmount * property.yieldPercent) / 100 / 12 : 0;
+  const totalTokens = property.tokenCount || 0;
+  const gradient = property.imageGradient || hashToGradient(params.id);
 
   return (
     <div className="min-h-screen bg-[#0a0e1a]">
       {/* Hero Section */}
-      <div className={`h-96 bg-gradient-to-br ${property.imageGradient} relative overflow-hidden`}>
+      <div className={`h-96 bg-gradient-to-br ${gradient} relative overflow-hidden`}>
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e1a] to-transparent" />
         <div className="absolute top-4 left-6">
           <Link
-            href="/property"
+            href="/"
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined">arrow_back</span>
@@ -416,30 +329,46 @@ export default function PropertyDetailPage({
 
               {/* Quick Stats */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-8 border-t border-white/[0.06]">
-                <div>
-                  <p className="text-xs text-white/50 uppercase tracking-wider mb-2">Year Built</p>
-                  <p className="text-xl font-serif italic font-bold text-white">
-                    {property.yearBuilt}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-white/50 uppercase tracking-wider mb-2">Total Sqft</p>
-                  <p className="text-xl font-serif italic font-bold text-white">
-                    {(property.sqft / 1000).toFixed(0)}K
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-white/50 uppercase tracking-wider mb-2">Units</p>
-                  <p className="text-xl font-serif italic font-bold text-white">
-                    {property.units}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-white/50 uppercase tracking-wider mb-2">Funded</p>
-                  <p className="text-xl font-serif italic font-bold text-[#10b981]">
-                    {property.fundedPercent}%
-                  </p>
-                </div>
+                {property.yearBuilt && (
+                  <div>
+                    <p className="text-xs text-white/50 uppercase tracking-wider mb-2">Year Built</p>
+                    <p className="text-xl font-serif italic font-bold text-white">
+                      {property.yearBuilt}
+                    </p>
+                  </div>
+                )}
+                {property.sqft > 0 && (
+                  <div>
+                    <p className="text-xs text-white/50 uppercase tracking-wider mb-2">Total Sqft</p>
+                    <p className="text-xl font-serif italic font-bold text-white">
+                      {property.sqft >= 1000 ? `${(property.sqft / 1000).toFixed(0)}K` : property.sqft.toLocaleString()}
+                    </p>
+                  </div>
+                )}
+                {property.units && (
+                  <div>
+                    <p className="text-xs text-white/50 uppercase tracking-wider mb-2">Units</p>
+                    <p className="text-xl font-serif italic font-bold text-white">
+                      {property.units}
+                    </p>
+                  </div>
+                )}
+                {totalTokens > 0 && (
+                  <div>
+                    <p className="text-xs text-white/50 uppercase tracking-wider mb-2">Total Tokens</p>
+                    <p className="text-xl font-serif italic font-bold text-[#c9a84c]">
+                      {totalTokens.toLocaleString()}
+                    </p>
+                  </div>
+                )}
+                {property.fundedPercent > 0 && (
+                  <div>
+                    <p className="text-xs text-white/50 uppercase tracking-wider mb-2">Funded</p>
+                    <p className="text-xl font-serif italic font-bold text-[#10b981]">
+                      {property.fundedPercent}%
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -447,7 +376,7 @@ export default function PropertyDetailPage({
             <div className="bg-[#111827]/80 rounded-2xl border border-white/[0.06] shadow-2xl overflow-hidden">
               {/* Tab Navigation */}
               <div className="flex border-b border-white/[0.06] overflow-x-auto">
-                {['overview', 'financials', 'documents', 'on-chain'].map((tab) => (
+                {['overview', 'financials', 'on-chain', 'provenance'].map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
@@ -457,13 +386,14 @@ export default function PropertyDetailPage({
                         : 'text-white/50 hover:text-white/70'
                     }`}
                   >
-                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                    {tab === 'on-chain' ? 'On-Chain' : tab.charAt(0).toUpperCase() + tab.slice(1)}
                   </button>
                 ))}
               </div>
 
               {/* Tab Content */}
               <div className="p-8">
+                {/* OVERVIEW TAB */}
                 {activeTab === 'overview' && (
                   <div className="space-y-8">
                     <div>
@@ -475,197 +405,348 @@ export default function PropertyDetailPage({
                       </p>
                     </div>
 
-                    <div>
-                      <h3 className="text-lg font-serif italic font-bold text-white mb-4">
-                        Key Features
-                      </h3>
-                      <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {property.features?.map((feature, i) => (
-                          <li key={i} className="flex items-center gap-3 text-white/70">
-                            <span className="material-symbols-outlined text-[#c9a84c] text-lg">
-                              check_circle
-                            </span>
-                            {feature}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                    {property.features && property.features.length > 0 && (
+                      <div>
+                        <h3 className="text-lg font-serif italic font-bold text-white mb-4">
+                          Key Features
+                        </h3>
+                        <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {property.features.map((feature, i) => (
+                            <li key={i} className="flex items-center gap-3 text-white/70">
+                              <span className="material-symbols-outlined text-[#c9a84c] text-lg">
+                                check_circle
+                              </span>
+                              {feature}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Show metadata keys as extra info */}
+                    {property.metadata && Object.keys(property.metadata).length > 0 && (
+                      <div>
+                        <h3 className="text-lg font-serif italic font-bold text-white mb-4">
+                          Property Metadata
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {Object.entries(property.metadata)
+                            .filter(([k]) => !['description', 'features', 'location', 'type', 'totalValue', 'tokenPrice', 'yieldPercent', 'fundedPercent', 'sqft', 'yearBuilt', 'units', 'rentalIncome', 'expenses', 'capRate', 'projectedReturn', 'tokenCount'].includes(k))
+                            .slice(0, 12)
+                            .map(([key, value]) => (
+                              <div key={key} className="p-3 bg-white/[0.03] rounded-lg border border-white/[0.06]">
+                                <p className="text-xs text-white/50 uppercase tracking-wider mb-1">
+                                  {key.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase())}
+                                </p>
+                                <p className="text-sm font-semibold text-white truncate">
+                                  {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                                </p>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
+                {/* FINANCIALS TAB */}
                 {activeTab === 'financials' && (
                   <div className="space-y-6">
-                    <table className="w-full text-sm">
-                      <tbody className="space-y-4">
-                        {[
-                          [
-                            'Annual Rental Income',
-                            `$${(property.rentalIncome! / 1000000).toFixed(1)}M`,
-                          ],
-                          [
-                            'Annual Expenses',
-                            `$${(property.expenses! / 1000000).toFixed(1)}M`,
-                          ],
-                          [
-                            'Net Operating Income',
-                            `$${((property.rentalIncome! - property.expenses!) / 1000000).toFixed(1)}M`,
-                          ],
-                          ['Cap Rate', `${property.capRate?.toFixed(1)}%`],
-                          [
-                            'Projected Annual Return',
-                            `${property.projectedReturn?.toFixed(1)}%`,
-                          ],
-                        ].map(([label, value], i) => (
-                          <tr
-                            key={i}
-                            className="border-b border-white/[0.06] last:border-0"
-                          >
-                            <td className="py-4 text-white/70">{label}</td>
-                            <td className="py-4 text-right font-semibold text-white">
-                              {value}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-
-                {activeTab === 'documents' && (
-                  <div className="space-y-3">
-                    {[
-                      { name: 'Title Deed', icon: 'description', hash: 'QmTitleDeed...' },
-                      { name: 'Inspection Report', icon: 'assignment_turned_in', hash: 'QmInspection...' },
-                      { name: 'Valuation Report', icon: 'assessment', hash: 'QmValuation...' },
-                      { name: 'Financial Statements', icon: 'receipt_long', hash: 'QmFinancials...' },
-                      { name: 'Legal Documentation', icon: 'gavel', hash: 'QmLegal...' },
-                    ].map((doc, i) => (
-                      <div
-                        key={i}
-                        className="flex items-center justify-between p-4 bg-white/[0.03] rounded-lg border border-white/[0.06] hover:border-[#c9a84c]/30 transition-colors cursor-pointer"
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="material-symbols-outlined text-[#c9a84c]">
-                            {doc.icon}
-                          </span>
-                          <div>
-                            <span className="font-medium text-white block">
-                              {doc.name}
-                            </span>
-                            <span className="text-xs text-white/50 font-mono">
-                              {doc.hash}
-                            </span>
-                          </div>
-                        </div>
-                        <span className="material-symbols-outlined text-white/50">
-                          download
+                    {(property.rentalIncome || property.expenses || property.capRate || property.projectedReturn) ? (
+                      <table className="w-full text-sm">
+                        <tbody>
+                          {property.rentalIncome && (
+                            <tr className="border-b border-white/[0.06]">
+                              <td className="py-4 text-white/70">Annual Rental Income</td>
+                              <td className="py-4 text-right font-semibold text-white">
+                                ${(property.rentalIncome / 1000000).toFixed(1)}M
+                              </td>
+                            </tr>
+                          )}
+                          {property.expenses && (
+                            <tr className="border-b border-white/[0.06]">
+                              <td className="py-4 text-white/70">Annual Expenses</td>
+                              <td className="py-4 text-right font-semibold text-white">
+                                ${(property.expenses / 1000000).toFixed(1)}M
+                              </td>
+                            </tr>
+                          )}
+                          {property.rentalIncome && property.expenses && (
+                            <tr className="border-b border-white/[0.06]">
+                              <td className="py-4 text-white/70">Net Operating Income</td>
+                              <td className="py-4 text-right font-semibold text-[#10b981]">
+                                ${((property.rentalIncome - property.expenses) / 1000000).toFixed(1)}M
+                              </td>
+                            </tr>
+                          )}
+                          {property.capRate && (
+                            <tr className="border-b border-white/[0.06]">
+                              <td className="py-4 text-white/70">Cap Rate</td>
+                              <td className="py-4 text-right font-semibold text-white">
+                                {property.capRate.toFixed(1)}%
+                              </td>
+                            </tr>
+                          )}
+                          {property.projectedReturn && (
+                            <tr className="border-b border-white/[0.06] last:border-0">
+                              <td className="py-4 text-white/70">Projected Annual Return</td>
+                              <td className="py-4 text-right font-semibold text-white">
+                                {property.projectedReturn.toFixed(1)}%
+                              </td>
+                            </tr>
+                          )}
+                          {property.yieldPercent > 0 && (
+                            <tr className="border-b border-white/[0.06] last:border-0">
+                              <td className="py-4 text-white/70">Token Yield</td>
+                              <td className="py-4 text-right font-semibold text-[#10b981]">
+                                {property.yieldPercent}%
+                              </td>
+                            </tr>
+                          )}
+                          {property.totalValue > 0 && (
+                            <tr className="last:border-0">
+                              <td className="py-4 text-white/70">Total Valuation</td>
+                              <td className="py-4 text-right font-semibold text-white">
+                                ${property.totalValue >= 1000000
+                                  ? `${(property.totalValue / 1000000).toFixed(1)}M`
+                                  : property.totalValue.toLocaleString()}
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <div className="text-center py-12">
+                        <span className="material-symbols-outlined text-4xl text-white/20 mb-4 block">
+                          analytics
                         </span>
+                        <p className="text-white/50">
+                          Financial data will appear here once the property has trading activity.
+                        </p>
+                        {property.totalValue > 0 && (
+                          <p className="text-white/70 mt-4 text-lg font-semibold">
+                            Total Value: ${property.totalValue >= 1000000
+                              ? `${(property.totalValue / 1000000).toFixed(1)}M`
+                              : property.totalValue.toLocaleString()}
+                          </p>
+                        )}
                       </div>
-                    ))}
+                    )}
                   </div>
                 )}
 
+                {/* ON-CHAIN TAB */}
                 {activeTab === 'on-chain' && (
                   <div className="space-y-4">
-                    <div className="p-4 bg-white/[0.03] rounded-lg border border-white/[0.06]">
-                      <p className="text-xs text-white/50 uppercase tracking-wider mb-2">
-                        Contract Address
-                      </p>
-                      <p className="font-mono text-sm text-white break-all">
-                        {property.contractAddress || '0x41Cf00E593c5623B00F812bC70Ee1A737C5aFF06'}
-                      </p>
-                    </div>
-                    <div className="p-4 bg-white/[0.03] rounded-lg border border-white/[0.06]">
-                      <p className="text-xs text-white/50 uppercase tracking-wider mb-2">
-                        Integrity Hash
-                      </p>
-                      <p className="font-mono text-sm text-white break-all">
-                        {property.integrityHash || `0x${Math.random().toString(16).slice(2, 66)}`}
-                      </p>
-                    </div>
-                    <div className="p-4 bg-white/[0.03] rounded-lg border border-white/[0.06]">
-                      <p className="text-xs text-white/50 uppercase tracking-wider mb-2">
-                        Owner Address
-                      </p>
-                      <p className="font-mono text-sm text-white break-all">
-                        {property.ownerAddress || '0x' + '0'.repeat(40)}
-                      </p>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    {property.contractAddress && (
                       <div className="p-4 bg-white/[0.03] rounded-lg border border-white/[0.06]">
                         <p className="text-xs text-white/50 uppercase tracking-wider mb-2">
-                          Total Supply
+                          Contract Address
                         </p>
-                        <p className="text-lg font-semibold text-white">2,000,000</p>
+                        <p className="font-mono text-sm text-white break-all">
+                          {property.contractAddress}
+                        </p>
                       </div>
+                    )}
+                    {property.integrityHash && (
                       <div className="p-4 bg-white/[0.03] rounded-lg border border-white/[0.06]">
                         <p className="text-xs text-white/50 uppercase tracking-wider mb-2">
-                          Token Holders
+                          Integrity Hash
                         </p>
-                        <p className="text-lg font-semibold text-white">1,847</p>
+                        <p className="font-mono text-sm text-white break-all">
+                          {property.integrityHash}
+                        </p>
                       </div>
-                    </div>
-                    <a
-                      href="https://32f.blockv.io/token/0x41Cf00E593c5623B00F812bC70Ee1A737C5aFF06"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 p-4 bg-[#c9a84c]/10 border border-[#c9a84c]/30 rounded-lg text-[#c9a84c] hover:bg-[#c9a84c]/20 transition-colors"
-                    >
-                      <span className="material-symbols-outlined">open_in_new</span>
-                      View on Blockscout Explorer
-                    </a>
+                    )}
+                    {property.ownerAddress && (
+                      <div className="p-4 bg-white/[0.03] rounded-lg border border-white/[0.06]">
+                        <p className="text-xs text-white/50 uppercase tracking-wider mb-2">
+                          Owner Address
+                        </p>
+                        <p className="font-mono text-sm text-white break-all">
+                          {property.ownerAddress}
+                        </p>
+                      </div>
+                    )}
 
-                    {/* On-Chain Activity */}
+                    <div className="p-4 bg-white/[0.03] rounded-lg border border-white/[0.06]">
+                      <p className="text-xs text-white/50 uppercase tracking-wider mb-2">
+                        Object ID
+                      </p>
+                      <p className="font-mono text-sm text-white break-all">
+                        {params.id}
+                      </p>
+                    </div>
+
+                    {totalTokens > 0 && (
+                      <div className="p-4 bg-white/[0.03] rounded-lg border border-white/[0.06]">
+                        <p className="text-xs text-white/50 uppercase tracking-wider mb-2">
+                          Token Supply
+                        </p>
+                        <p className="text-lg font-semibold text-white">
+                          {totalTokens.toLocaleString()}
+                        </p>
+                      </div>
+                    )}
+
+                    {property.blockscoutUrl && (
+                      <a
+                        href={property.blockscoutUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2 p-4 bg-[#c9a84c]/10 border border-[#c9a84c]/30 rounded-lg text-[#c9a84c] hover:bg-[#c9a84c]/20 transition-colors"
+                      >
+                        <span className="material-symbols-outlined">open_in_new</span>
+                        View on Blockscout Explorer
+                      </a>
+                    )}
+
+                    {/* On-Chain Activity from real data */}
                     <div className="pt-4 border-t border-white/[0.06]">
                       <h4 className="text-lg font-serif italic font-bold text-white mb-4">
                         On-Chain Activity
                       </h4>
-                      <div className="space-y-3">
-                        {[
-                          {
-                            event: 'Token Transfer',
-                            from: '0x1234...5678',
-                            to: '0x8765...4321',
-                            amount: '5000 tokens',
-                            time: '2 hours ago',
-                          },
-                          {
-                            event: 'Yield Distribution',
-                            from: 'Contract',
-                            to: 'All Holders',
-                            amount: '$45,200',
-                            time: '1 day ago',
-                          },
-                          {
-                            event: 'Property Mint',
-                            from: 'Genesis',
-                            to: '0x41Cf...',
-                            amount: '2M tokens',
-                            time: '30 days ago',
-                          },
-                        ].map((activity, i) => (
-                          <div
-                            key={i}
-                            className="flex items-center justify-between p-3 bg-white/[0.03] rounded-lg border border-white/[0.06]"
-                          >
-                            <div>
-                              <p className="text-sm font-semibold text-white">
-                                {activity.event}
-                              </p>
-                              <p className="text-xs text-white/50">
-                                {activity.from} → {activity.to}
-                              </p>
+                      {provenanceLoading ? (
+                        <div className="flex items-center justify-center py-8">
+                          <div className="w-8 h-8 border-2 border-[#c9a84c] border-t-transparent rounded-full animate-spin" />
+                        </div>
+                      ) : activity.length > 0 ? (
+                        <div className="space-y-3">
+                          {activity.slice(0, 10).map((act) => (
+                            <div
+                              key={act.id}
+                              className="flex items-center justify-between p-3 bg-white/[0.03] rounded-lg border border-white/[0.06]"
+                            >
+                              <div className="flex items-center gap-3">
+                                <span className={`material-symbols-outlined ${eventColor(act.event)}`}>
+                                  {eventIcon(act.event)}
+                                </span>
+                                <div>
+                                  <p className="text-sm font-semibold text-white">
+                                    {act.event.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                                  </p>
+                                  {act.hash && (
+                                    <p className="text-xs text-white/50 font-mono">
+                                      {act.hash.slice(0, 10)}...{act.hash.slice(-6)}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                {act.amount && (
+                                  <p className="text-sm font-semibold text-[#c9a84c]">
+                                    {act.amount}
+                                  </p>
+                                )}
+                                <p className="text-xs text-white/50">{timeAgo(act.timestamp)}</p>
+                              </div>
                             </div>
-                            <div className="text-right">
-                              <p className="text-sm font-semibold text-[#c9a84c]">
-                                {activity.amount}
-                              </p>
-                              <p className="text-xs text-white/50">{activity.time}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8">
+                          <span className="material-symbols-outlined text-3xl text-white/20 mb-2 block">
+                            history
+                          </span>
+                          <p className="text-white/50 text-sm">
+                            No on-chain activity recorded yet for this property.
+                          </p>
+                        </div>
+                      )}
                     </div>
+                  </div>
+                )}
+
+                {/* PROVENANCE TAB */}
+                {activeTab === 'provenance' && (
+                  <div>
+                    <h3 className="text-lg font-serif italic font-bold text-white mb-6">
+                      Provenance Timeline
+                    </h3>
+                    {provenanceLoading ? (
+                      <div className="flex items-center justify-center py-12">
+                        <div className="w-8 h-8 border-2 border-[#c9a84c] border-t-transparent rounded-full animate-spin" />
+                      </div>
+                    ) : provenance.length > 0 ? (
+                      <div className="relative">
+                        {/* Timeline line */}
+                        <div className="absolute left-6 top-0 bottom-0 w-px bg-white/[0.1]" />
+
+                        <div className="space-y-6">
+                          {provenance.map((event, i) => (
+                            <div key={event.id || i} className="relative flex gap-4 pl-2">
+                              {/* Timeline dot */}
+                              <div className={`relative z-10 flex-shrink-0 w-9 h-9 rounded-full border-2 flex items-center justify-center ${
+                                event.status === 'completed' || event.status === 'success'
+                                  ? 'border-[#10b981] bg-[#10b981]/20'
+                                  : event.status === 'failed'
+                                  ? 'border-red-400 bg-red-400/20'
+                                  : 'border-[#c9a84c] bg-[#c9a84c]/20'
+                              }`}>
+                                <span className={`material-symbols-outlined text-sm ${
+                                  event.status === 'completed' || event.status === 'success'
+                                    ? 'text-[#10b981]'
+                                    : event.status === 'failed'
+                                    ? 'text-red-400'
+                                    : 'text-[#c9a84c]'
+                                }`}>
+                                  {eventIcon(event.type)}
+                                </span>
+                              </div>
+
+                              {/* Event content */}
+                              <div className="flex-grow bg-white/[0.03] rounded-lg border border-white/[0.06] p-4 hover:border-[#c9a84c]/20 transition-colors">
+                                <div className="flex items-start justify-between gap-2">
+                                  <div>
+                                    <p className="font-semibold text-white">
+                                      {event.type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                                    </p>
+                                    <p className="text-sm text-white/60 mt-1">
+                                      {event.description}
+                                    </p>
+                                  </div>
+                                  <span className={`text-xs px-2 py-1 rounded-full ${
+                                    event.status === 'completed' || event.status === 'success'
+                                      ? 'bg-[#10b981]/20 text-[#10b981]'
+                                      : event.status === 'failed'
+                                      ? 'bg-red-400/20 text-red-400'
+                                      : 'bg-[#c9a84c]/20 text-[#c9a84c]'
+                                  }`}>
+                                    {event.status}
+                                  </span>
+                                </div>
+
+                                <div className="flex items-center gap-4 mt-3 text-xs text-white/50">
+                                  <span>{timeAgo(event.timestamp)}</span>
+                                  {event.actor && (
+                                    <span className="font-mono">
+                                      by {event.actor.slice(0, 8)}...
+                                    </span>
+                                  )}
+                                  {event.txHash && (
+                                    <span className="font-mono">
+                                      tx: {event.txHash.slice(0, 10)}...
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <span className="material-symbols-outlined text-4xl text-white/20 mb-4 block">
+                          timeline
+                        </span>
+                        <p className="text-white/50 mb-2">
+                          No provenance events recorded yet.
+                        </p>
+                        <p className="text-white/40 text-sm">
+                          Provenance events track the full lifecycle of this property on-chain — minting, transfers, yield distributions, and more.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -677,18 +758,18 @@ export default function PropertyDetailPage({
                 Tokenization Structure
               </h3>
               <p className="text-white/70 mb-6">
-                This property is tokenized into 2,000,000 ERC-20 tokens, allowing fractional ownership. Each
-                token represents an equal claim on property income and appreciation. Tokens can be traded on
-                the DUAL platform or secondary markets.
+                {totalTokens > 0
+                  ? `This property is tokenized into ${totalTokens.toLocaleString()} tokens on the DUAL Network, allowing fractional ownership. Each token represents an equal claim on property income and appreciation.`
+                  : 'This property is tokenized on the DUAL Network, allowing fractional ownership. Tokens can be traded on the DUAL platform or secondary markets.'}
               </p>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {[
-                  { label: 'Token Symbol', value: 'ELYS' },
-                  { label: 'Decimals', value: '18' },
-                  { label: 'Blockchain', value: 'DUAL Network' },
-                  { label: 'Total Supply', value: '2M' },
-                  { label: 'Holder Count', value: '1,847' },
-                  { label: 'Holders', value: 'View Explorer' },
+                  { label: 'Network', value: 'DUAL Network' },
+                  { label: 'Object ID', value: params.id.slice(0, 12) + '...' },
+                  ...(totalTokens > 0 ? [{ label: 'Token Supply', value: totalTokens.toLocaleString() }] : []),
+                  ...(property.tokenPrice > 0 ? [{ label: 'Token Price', value: `$${property.tokenPrice.toFixed(2)}` }] : []),
+                  ...(property.contractAddress ? [{ label: 'Contract', value: property.contractAddress.slice(0, 10) + '...' }] : []),
+                  ...(property.blockscoutUrl ? [{ label: 'Explorer', value: 'View on Blockscout' }] : []),
                 ].map((item, i) => (
                   <div
                     key={i}
@@ -708,120 +789,134 @@ export default function PropertyDetailPage({
           <div className="lg:col-span-1">
             <div className="sticky top-24 bg-[#111827]/80 rounded-2xl border border-white/[0.06] shadow-2xl p-8 space-y-6">
               {/* Property Value */}
-              <div className="pb-6 border-b border-white/[0.06]">
-                <p className="text-xs text-white/50 uppercase tracking-wider mb-2">
-                  Total Property Value
-                </p>
-                <p className="text-3xl font-serif italic font-bold text-white">
-                  ${(property.totalValue / 1000000).toFixed(1)}M
-                </p>
-              </div>
+              {property.totalValue > 0 && (
+                <div className="pb-6 border-b border-white/[0.06]">
+                  <p className="text-xs text-white/50 uppercase tracking-wider mb-2">
+                    Total Property Value
+                  </p>
+                  <p className="text-3xl font-serif italic font-bold text-white">
+                    ${property.totalValue >= 1000000
+                      ? `${(property.totalValue / 1000000).toFixed(1)}M`
+                      : property.totalValue.toLocaleString()}
+                  </p>
+                </div>
+              )}
 
               {/* Token Price */}
-              <div className="pb-6 border-b border-white/[0.06]">
-                <p className="text-xs text-white/50 uppercase tracking-wider mb-2">
-                  Token Price
-                </p>
-                <p className="text-2xl font-semibold text-white">
-                  ${property.tokenPrice.toFixed(2)}
-                </p>
-              </div>
+              {property.tokenPrice > 0 && (
+                <div className="pb-6 border-b border-white/[0.06]">
+                  <p className="text-xs text-white/50 uppercase tracking-wider mb-2">
+                    Token Price
+                  </p>
+                  <p className="text-2xl font-semibold text-white">
+                    ${property.tokenPrice.toFixed(2)}
+                  </p>
+                </div>
+              )}
 
               {/* Key Metrics */}
               <div className="space-y-3 pb-6 border-b border-white/[0.06]">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-white/70">Minimum Investment</span>
-                  <span className="font-semibold text-white">
-                    ${property.tokenPrice.toFixed(2)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-white/70">Annual Yield</span>
-                  <span className="font-semibold text-[#10b981]">
-                    {property.yieldPercent}%
-                  </span>
-                </div>
+                {property.tokenPrice > 0 && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-white/70">Minimum Investment</span>
+                    <span className="font-semibold text-white">
+                      ${property.tokenPrice.toFixed(2)}
+                    </span>
+                  </div>
+                )}
+                {property.yieldPercent > 0 && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-white/70">Annual Yield</span>
+                    <span className="font-semibold text-[#10b981]">
+                      {property.yieldPercent}%
+                    </span>
+                  </div>
+                )}
               </div>
 
-              {/* Tokens Remaining */}
-              <div className="pb-6 border-b border-white/[0.06]">
-                <p className="text-xs text-white/50 uppercase tracking-wider mb-3">
-                  Tokens Remaining
-                </p>
-                <div className="h-2 bg-white/[0.08] rounded-full overflow-hidden mb-2">
-                  <div
-                    className="h-full bg-gradient-to-r from-[#c9a84c] to-[#a68832]"
-                    style={{
-                      width: `${100 - property.fundedPercent}%`,
-                    }}
-                  />
-                </div>
-                <p className="text-xs text-white/60">
-                  {Math.round((2000000 * (100 - property.fundedPercent)) / 100).toLocaleString()} of 2,000,000
-                </p>
-              </div>
-
-              {/* Investment Amount Input */}
-              <div className="pb-6 border-b border-white/[0.06]">
-                <p className="text-xs text-white/50 uppercase tracking-wider mb-3">
-                  Investment Amount
-                </p>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() =>
-                      setInvestmentAmount(
-                        Math.max(property.tokenPrice, investmentAmount - 1000)
-                      )
-                    }
-                    className="p-2 bg-white/[0.05] hover:bg-white/[0.1] rounded-lg transition-colors"
-                  >
-                    <span className="material-symbols-outlined">remove</span>
-                  </button>
-                  <div className="flex-grow">
-                    <input
-                      type="number"
-                      value={Math.round(countedValue * 100) / 100}
-                      onChange={(e) =>
-                        setInvestmentAmount(parseFloat(e.target.value) || 0)
-                      }
-                      className="w-full bg-white/[0.05] border border-white/[0.1] text-white px-4 py-2 rounded-lg text-center focus:outline-none focus:border-[#c9a84c]"
+              {/* Funding Progress */}
+              {property.fundedPercent > 0 && (
+                <div className="pb-6 border-b border-white/[0.06]">
+                  <p className="text-xs text-white/50 uppercase tracking-wider mb-3">
+                    Funding Progress
+                  </p>
+                  <div className="h-2 bg-white/[0.08] rounded-full overflow-hidden mb-2">
+                    <div
+                      className="h-full bg-gradient-to-r from-[#c9a84c] to-[#a68832]"
+                      style={{ width: `${Math.min(property.fundedPercent, 100)}%` }}
                     />
                   </div>
-                  <button
-                    onClick={() =>
-                      setInvestmentAmount(investmentAmount + 1000)
-                    }
-                    className="p-2 bg-white/[0.05] hover:bg-white/[0.1] rounded-lg transition-colors"
-                  >
-                    <span className="material-symbols-outlined">add</span>
-                  </button>
+                  <p className="text-xs text-white/60">
+                    {property.fundedPercent}% funded
+                  </p>
                 </div>
-                <p className="text-xs text-white/60 mt-2">
-                  = {tokens.toLocaleString()} tokens
-                </p>
-              </div>
+              )}
+
+              {/* Investment Amount Input */}
+              {property.tokenPrice > 0 && (
+                <div className="pb-6 border-b border-white/[0.06]">
+                  <p className="text-xs text-white/50 uppercase tracking-wider mb-3">
+                    Investment Amount
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() =>
+                        setInvestmentAmount(
+                          Math.max(property.tokenPrice, investmentAmount - 1000)
+                        )
+                      }
+                      className="p-2 bg-white/[0.05] hover:bg-white/[0.1] rounded-lg transition-colors"
+                    >
+                      <span className="material-symbols-outlined">remove</span>
+                    </button>
+                    <div className="flex-grow">
+                      <input
+                        type="number"
+                        value={Math.round(countedValue * 100) / 100}
+                        onChange={(e) =>
+                          setInvestmentAmount(parseFloat(e.target.value) || 0)
+                        }
+                        className="w-full bg-white/[0.05] border border-white/[0.1] text-white px-4 py-2 rounded-lg text-center focus:outline-none focus:border-[#c9a84c]"
+                      />
+                    </div>
+                    <button
+                      onClick={() =>
+                        setInvestmentAmount(investmentAmount + 1000)
+                      }
+                      className="p-2 bg-white/[0.05] hover:bg-white/[0.1] rounded-lg transition-colors"
+                    >
+                      <span className="material-symbols-outlined">add</span>
+                    </button>
+                  </div>
+                  <p className="text-xs text-white/60 mt-2">
+                    = {tokens.toLocaleString()} tokens
+                  </p>
+                </div>
+              )}
 
               {/* Summary */}
-              <div className="space-y-2 pb-6 border-b border-white/[0.06]">
-                <div className="flex justify-between text-sm">
-                  <span className="text-white/70">Monthly Yield</span>
-                  <span className="font-semibold text-[#10b981]">
-                    ${monthlyYield.toFixed(0)}
-                  </span>
+              {property.yieldPercent > 0 && investmentAmount > 0 && (
+                <div className="space-y-2 pb-6 border-b border-white/[0.06]">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-white/70">Monthly Yield</span>
+                    <span className="font-semibold text-[#10b981]">
+                      ${monthlyYield.toFixed(0)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-white/70">Annual Yield</span>
+                    <span className="font-semibold text-white">
+                      ${(monthlyYield * 12).toFixed(0)}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-white/70">Annual Yield</span>
-                  <span className="font-semibold text-white">
-                    ${(monthlyYield * 12).toFixed(0)}
-                  </span>
-                </div>
-              </div>
+              )}
 
               {/* Action Buttons */}
               <div className="space-y-3">
                 <button
                   onClick={handleInvest}
-                  disabled={investLoading}
+                  disabled={investLoading || investmentAmount <= 0}
                   className="w-full py-4 bg-gradient-to-r from-[#c9a84c] to-[#a68832] text-[#0a0e1a] font-semibold rounded-lg hover:shadow-lg hover:shadow-[#c9a84c]/30 transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
                 >
                   {investLoading ? 'Processing...' : 'Invest Now'}
@@ -841,62 +936,6 @@ export default function PropertyDetailPage({
                   Powered by DUAL Network
                 </p>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Rental Yield Distribution */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="bg-[#111827]/80 rounded-2xl border border-white/[0.06] shadow-2xl p-8">
-          <h3 className="text-2xl font-serif italic font-bold text-white mb-8">
-            Rental Yield Distribution
-          </h3>
-
-          <div className="grid grid-cols-12 gap-1 items-end h-48">
-            {[45, 52, 48, 61, 58, 72, 65, 78, 85, 92, 88, 95].map((height, i) => (
-              <div key={i} className="flex flex-col items-center gap-2 flex-1">
-                <div
-                  className="w-full bg-gradient-to-t from-[#c9a84c] to-[#a68832] rounded-t-lg hover:from-[#d4b85d] hover:to-[#b59845] transition-all duration-300 cursor-pointer hover:shadow-lg hover:shadow-[#c9a84c]/20"
-                  style={{ height: `${height}%` }}
-                />
-                <p className="text-xs text-white/50 mt-2">M{i + 1}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12 pt-8 border-t border-white/[0.06]">
-            <div>
-              <p className="text-xs text-white/50 uppercase tracking-wider mb-2">
-                Average Monthly
-              </p>
-              <p className="text-2xl font-serif italic font-bold text-white">
-                $1.54M
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-white/50 uppercase tracking-wider mb-2">
-                Peak Month
-              </p>
-              <p className="text-2xl font-serif italic font-bold text-[#10b981]">
-                $1.92M
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-white/50 uppercase tracking-wider mb-2">
-                Total This Year
-              </p>
-              <p className="text-2xl font-serif italic font-bold text-white">
-                $18.5M
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-white/50 uppercase tracking-wider mb-2">
-                Distribution Rate
-              </p>
-              <p className="text-2xl font-serif italic font-bold text-white">
-                Monthly
-              </p>
             </div>
           </div>
         </div>

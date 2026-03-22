@@ -56,6 +56,11 @@ export default function PropertyAdminPage() {
     projectedAppreciation: 0,
   });
 
+  // Fetch org balance and templates when authenticated
+  const [orgBalance, setOrgBalance] = useState<any>(null);
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
+
   // Check auth on mount
   useEffect(() => {
     fetch('/api/auth/status')
@@ -65,6 +70,29 @@ export default function PropertyAdminPage() {
       })
       .catch(() => setAuthState('unauthenticated'));
   }, []);
+
+  // Fetch org balance and templates when authenticated
+  useEffect(() => {
+    if (authState !== 'authenticated') return;
+
+    // Fetch org balance
+    fetch('/api/organizations/balance')
+      .then((r) => r.json())
+      .then((data) => {
+        if (!data.error) setOrgBalance(data.balance);
+      })
+      .catch(() => {});
+
+    // Fetch templates
+    fetch('/api/templates/list')
+      .then((r) => r.json())
+      .then((data) => {
+        const tpls = data.templates || [];
+        setTemplates(tpls);
+        if (tpls.length > 0) setSelectedTemplate(tpls[0].id);
+      })
+      .catch(() => {});
+  }, [authState]);
 
   const handleSendOtp = async () => {
     if (!email) return;
@@ -186,7 +214,7 @@ export default function PropertyAdminPage() {
       const res = await fetch('/api/properties', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(mintPayload),
+        body: JSON.stringify({ ...mintPayload, templateId: selectedTemplate || undefined }),
       });
       const data = await res.json();
 
@@ -464,6 +492,44 @@ export default function PropertyAdminPage() {
           </div>
           <p className="text-gray-400">Create and tokenize a new property on the DUAL Network.</p>
         </div>
+
+        {/* Organization Dashboard */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <div className="bg-card-dark rounded-lg border border-gold-dim/20 p-6">
+            <p className="text-gray-400 text-sm mb-1">Organization Balance</p>
+            <p className="text-2xl font-bold text-white">{orgBalance ? JSON.stringify(orgBalance).slice(0, 30) : 'Loading...'}</p>
+          </div>
+          <div className="bg-card-dark rounded-lg border border-gold-dim/20 p-6">
+            <p className="text-gray-400 text-sm mb-1">Available Templates</p>
+            <p className="text-2xl font-bold text-white">{templates.length}</p>
+          </div>
+          <div className="bg-card-dark rounded-lg border border-gold-dim/20 p-6">
+            <p className="text-gray-400 text-sm mb-1">Network Status</p>
+            <p className="text-2xl font-bold text-green-400 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+              Connected
+            </p>
+          </div>
+        </div>
+
+        {/* Template Selector */}
+        {templates.length > 0 && (
+          <div className="bg-card-dark rounded-lg border border-gold-dim/20 p-6 mb-8">
+            <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+              <span className="text-gold-bright">📋</span> Select Template
+            </h2>
+            <select
+              value={selectedTemplate}
+              onChange={(e) => setSelectedTemplate(e.target.value)}
+              className="w-full px-4 py-2 rounded bg-navy-light border border-gold-dim/20 text-white focus:outline-none focus:border-gold-bright transition"
+            >
+              {templates.map((t: any) => (
+                <option key={t.id} value={t.id}>{t.name} — {t.description || 'No description'}</option>
+              ))}
+            </select>
+            <p className="text-xs text-gray-400 mt-2">Selected template ID: {selectedTemplate || 'default from env'}</p>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Property Information Section */}

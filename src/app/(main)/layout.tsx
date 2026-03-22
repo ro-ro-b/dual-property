@@ -70,6 +70,13 @@ export default function PropertyLayout({
                 Distribute
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-[#c9a84c] to-transparent group-hover:w-full transition-all duration-300" />
               </Link>
+              <Link
+                href="/admin"
+                className="text-sm font-medium text-white/70 hover:text-white transition-colors duration-200 relative group"
+              >
+                Admin
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-[#c9a84c] to-transparent group-hover:w-full transition-all duration-300" />
+              </Link>
             </div>
 
             {/* Mobile Menu Button */}
@@ -107,6 +114,12 @@ export default function PropertyLayout({
                 className="block text-sm font-medium text-white/70 hover:text-white px-4 py-2 rounded-lg hover:bg-white/[0.05] transition-colors"
               >
                 Distribute
+              </Link>
+              <Link
+                href="/admin"
+                className="block text-sm font-medium text-white/70 hover:text-white px-4 py-2 rounded-lg hover:bg-white/[0.05] transition-colors"
+              >
+                Admin
               </Link>
             </div>
           )}
