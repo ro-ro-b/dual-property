@@ -14,8 +14,27 @@ export async function GET(req: NextRequest) {
   try {
     const templateId = process.env.DUAL_PROPERTIES_TEMPLATE_ID || FALLBACK_TEMPLATE_ID;
 
-    // Get org-scoped JWT (auto-refreshes expired tokens via refresh cookie)
-    const jwtToken = await getOrgToken(req);
+    // Try multiple token sources in order:
+    // 1. User JWT from cookie/header (via getOrgToken)
+    // 2. Server-side cached client from dual-auth
+    // 3. Raw env DUAL_API_TOKEN as last resort
+    let jwtToken = await getOrgToken(req);
+
+    if (!jwtToken) {
+      // Try server-side cached auth client
+      try {
+        const client = await getAuthenticatedClient();
+        if (client) {
+          const clientToken = (client as any).http?.token || (client as any).config?.token || '';
+          if (clientToken) jwtToken = clientToken;
+        }
+      } catch { /* no cached client */ }
+    }
+
+    if (!jwtToken && process.env.DUAL_API_TOKEN) {
+      // Last resort: use env token directly — gateway will decide if it's valid
+      jwtToken = process.env.DUAL_API_TOKEN;
+    }
 
     if (!jwtToken) {
       // No valid JWT — fall back to data provider

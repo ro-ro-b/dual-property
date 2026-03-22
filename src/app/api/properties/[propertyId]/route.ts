@@ -1,33 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDataProvider } from "@/lib/data-provider";
+import { getOrgToken, dualFetch } from "@/lib/get-org-token";
+import { getAuthenticatedClient } from "@/lib/dual-auth";
 
 export const dynamic = "force-dynamic";
 
-const FALLBACK_ORG_ID = '69b935b4187e903f826bbe71';
-
-// Helper: get an org-scoped JWT from a cookie (switching from system if needed)
+// Helper: get an org-scoped JWT trying all available sources
 async function getOrgScopedToken(req: NextRequest): Promise<string> {
-  const BASE = process.env.NEXT_PUBLIC_DUAL_API_URL || 'https://gateway-48587430648.europe-west6.run.app';
-  let jwtToken = req.cookies.get('dual_jwt')?.value || process.env.DUAL_API_TOKEN || '';
-  const orgId = process.env.DUAL_ORG_ID || FALLBACK_ORG_ID;
+  // 1. Try shared getOrgToken (cookie/header/env with auto-refresh)
+  let token = await getOrgToken(req);
+  if (token) return token;
 
-  if (jwtToken) {
-    try {
-      const payload = JSON.parse(Buffer.from(jwtToken.split('.')[1], 'base64').toString());
-      if (payload.fqdn === 'system' && orgId) {
-        const switchRes = await fetch(`${BASE}/organizations/switch`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${jwtToken}` },
-          body: JSON.stringify({ id: orgId }),
-        });
-        if (switchRes.ok) {
-          const switchData = await switchRes.json();
-          jwtToken = switchData.access_token || jwtToken;
-        }
-      }
-    } catch { /* use as-is */ }
-  }
-  return jwtToken;
+  // 2. Try server-side cached auth client
+  try {
+    const client = await getAuthenticatedClient();
+    if (client) {
+      const clientToken = (client as any).http?.token || (client as any).config?.token || '';
+      if (clientToken) return clientToken;
+    }
+  } catch { /* no cached client */ }
+
+  // 3. Last resort: raw env token
+  return process.env.DUAL_API_TOKEN || '';
 }
 
 // Map a raw DUAL gateway object to the property format the detail page expects

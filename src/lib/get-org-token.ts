@@ -83,22 +83,32 @@ export async function getOrgToken(req: NextRequest): Promise<string> {
   const headerToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
   const cookieToken = req.cookies.get('dual_jwt')?.value;
   const refreshCookie = req.cookies.get('dual_refresh')?.value;
-  let token = headerToken || cookieToken || process.env.DUAL_API_TOKEN || '';
+  const envToken = process.env.DUAL_API_TOKEN || '';
+  let token = headerToken || cookieToken || envToken;
 
   if (!token) return '';
 
   const orgId = process.env.DUAL_ORG_ID || FALLBACK_ORG_ID;
+  const isEnvToken = !headerToken && !cookieToken && token === envToken;
 
   // Check if JWT is expired and try to refresh
   const { expired } = parseJwt(token);
-  if (expired && refreshCookie) {
-    const refreshed = await refreshToken(refreshCookie);
-    if (refreshed) {
-      token = refreshed;
-    } else {
-      // Refresh failed — token is expired and unusable
+  if (expired) {
+    if (refreshCookie) {
+      const refreshed = await refreshToken(refreshCookie);
+      if (refreshed) {
+        token = refreshed;
+      } else if (!isEnvToken) {
+        // Refresh failed for a user token — unusable
+        return '';
+      }
+      // For env token with no refresh cookie, try using it anyway —
+      // the gateway may still accept it or we'll fall back gracefully
+    } else if (!isEnvToken) {
+      // User token expired with no refresh — unusable
       return '';
     }
+    // env token: always try it even if expired — let the gateway decide
   }
 
   // Switch to org scope if needed
