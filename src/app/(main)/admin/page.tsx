@@ -16,6 +16,26 @@ type MintStep = {
 
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
+// Compress a data URL image to a smaller JPEG using canvas
+// This reduces ~2MB PNGs to ~40-80KB JPEGs that fit in custom fields
+function compressImage(dataUrl: string, maxWidth = 800, quality = 0.7): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ratio = Math.min(maxWidth / img.width, 1);
+      canvas.width = Math.round(img.width * ratio);
+      canvas.height = Math.round(img.height * ratio);
+      const ctx = canvas.getContext('2d');
+      if (!ctx) { resolve(dataUrl); return; }
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => resolve(dataUrl); // fallback to original
+    img.src = dataUrl;
+  });
+}
+
 export default function PropertyAdminPage() {
   const router = useRouter();
   const [authState, setAuthState] = useState<AuthState>('checking');
@@ -224,9 +244,11 @@ export default function PropertyAdminPage() {
       });
       const data = await res.json();
       if (!res.ok || !data.success) { setGenError(data.error || 'Image generation failed'); setGenPhase('idle'); setGenerating(false); return; }
-      setImageUrl(data.imageUrl);
+      // Compress to small JPEG so it fits in gateway custom fields
+      const compressed = await compressImage(data.imageUrl, 800, 0.7);
+      setImageUrl(compressed);
       imageBase64Ref.current = data.imageBase64;
-      imageMimeTypeRef.current = data.mimeType || 'image/png';
+      imageMimeTypeRef.current = 'image/jpeg';
       setGenPhase('done');
     } catch (err: any) { setGenError(err.message || 'Image generation failed'); setGenPhase('idle'); }
     setGenerating(false);
@@ -259,9 +281,10 @@ export default function PropertyAdminPage() {
       });
       const imgData = await imgRes.json();
       if (!imgRes.ok || !imgData.success) { setGenError(imgData.error || 'Image generation failed'); setGenPhase('idle'); setGenerating(false); return; }
-      setImageUrl(imgData.imageUrl);
+      const compressed = await compressImage(imgData.imageUrl, 800, 0.7);
+      setImageUrl(compressed);
       imageBase64Ref.current = imgData.imageBase64;
-      imageMimeTypeRef.current = imgData.mimeType || 'image/png';
+      imageMimeTypeRef.current = 'image/jpeg';
     } catch (err: any) { setGenError(err.message); setGenPhase('idle'); setGenerating(false); return; }
     // Phase 2: Video
     setGenPhase('video');
@@ -316,7 +339,7 @@ export default function PropertyAdminPage() {
 
     try {
       // Include non-data-URL images/videos in mint payload (small URLs like hosted paths)
-      const isDataUrl = (url: string) => url.startsWith('data:');
+
       const mintCustom: Record<string, any> = {
         name: form.name,
         address: form.address,
@@ -339,9 +362,9 @@ export default function PropertyAdminPage() {
         capRate: form.capRate,
         projectedAppreciation: form.projectedAppreciation,
       };
-      // Only include URLs in mint if they're short (not base64 data URLs)
-      if (imageUrl && !isDataUrl(imageUrl)) mintCustom.imageUrl = imageUrl;
-      if (videoUrl && !isDataUrl(videoUrl)) mintCustom.videoUrl = videoUrl;
+      // Include compressed image URL directly in mint (compressed JPEG is small enough)
+      if (imageUrl) mintCustom.imageUrl = imageUrl;
+      if (videoUrl) mintCustom.videoUrl = videoUrl;
 
       const mintPayload = { data: mintCustom };
 
