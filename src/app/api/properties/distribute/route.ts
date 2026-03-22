@@ -7,12 +7,13 @@ const FALLBACK_TEMPLATE_ID = '69c057ffee7cf8d3342efec4';
 
 /**
  * POST /api/properties/distribute
- * Distribute yield across all properties (admin action).
  *
- * Body options:
- *   { propertyId }           — distribute for a single property
- *   { all: true }            — distribute for all properties
- *   { propertyId, holders }  — manual holder list (advanced)
+ * Distribute yield across properties by minting "Distribution Receipt" tokens.
+ * Each receipt is an on-chain object recording the payout for a given period.
+ *
+ * Body:
+ *   { propertyId }   — single property
+ *   { all: true }    — all properties
  */
 export async function POST(req: NextRequest) {
   try {
@@ -23,19 +24,21 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     const period = body.period || new Date().toISOString().slice(0, 7);
+    const templateId = process.env.DUAL_PROPERTIES_TEMPLATE_ID || FALLBACK_TEMPLATE_ID;
     const results: any[] = [];
 
     // Determine which properties to distribute
     let propertyIds: string[] = [];
 
     if (body.all) {
-      // Fetch all properties
-      const templateId = process.env.DUAL_PROPERTIES_TEMPLATE_ID || FALLBACK_TEMPLATE_ID;
       const listRes = await dualFetch(`/objects?template_id=${templateId}&limit=100`, token);
       if (listRes.ok) {
         const data = await listRes.json();
         const objects = data?.items || data?.objects || [];
-        propertyIds = objects.map((o: any) => o.id);
+        // Only include actual property objects (not receipts)
+        propertyIds = objects
+          .filter((o: any) => !o.custom?.type || o.custom.type !== 'yield_receipt')
+          .map((o: any) => o.id);
       }
     } else if (body.propertyId) {
       propertyIds = [body.propertyId];
@@ -43,48 +46,45 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Provide propertyId or { all: true }" }, { status: 400 });
     }
 
-    // For each property, calculate yield and record distribution
     for (const propId of propertyIds) {
       const objRes = await dualFetch(`/objects/${propId}`, token);
       if (!objRes.ok) continue;
 
       const obj = await objRes.json();
       const c = obj.custom || {};
+      if (c.type === 'yield_receipt' || c.type === 'distribution_receipt') continue;
+
       const totalValue = c.totalPropertyValue || 0;
       const annualYield = c.annualYield || 0;
       const totalTokens = c.totalTokens || 1;
       const name = c.name || 'Property';
-
-      // Monthly yield pool for this property
       const monthlyYieldPool = Math.round((totalValue * (annualYield / 100)) / 12 * 100) / 100;
-      const yieldPerToken = monthlyYieldPool / totalTokens;
+      const yieldPerToken = Math.round((monthlyYieldPool / totalTokens) * 10000) / 10000;
 
-      // For now, the org owner holds all tokens — single distribution
-      // In production this would iterate actual holder wallets
-      const holder = {
-        address: obj.owner || 'org_owner',
-        shares: totalTokens,
-        payout: monthlyYieldPool,
-      };
-
-      // Execute distribution action on DUAL
-      const distRes = await dualFetch('/ebus/execute', token, {
+      // Mint a distribution receipt on-chain
+      const mintRes = await dualFetch('/ebus/execute', token, {
         method: 'POST',
         body: JSON.stringify({
           action: {
-            custom: {
-              name: "distribute_dividends",
-              object_id: propId,
+            mint: {
+              template_id: templateId,
+              num: 1,
               data: {
+                metadata: {
+                  name: `Distribution Receipt — ${name}`,
+                  description: `Yield distribution for ${period}`,
+                  category: 'Distribution Receipt',
+                },
                 custom: {
-                  holderAddress: holder.address,
-                  shares: holder.shares,
-                  payoutAmount: holder.payout,
-                  yieldPerToken,
-                  period,
+                  type: 'distribution_receipt',
+                  propertyId: propId,
                   propertyName: name,
+                  period,
                   totalPropertyValue: totalValue,
                   annualYieldPercent: annualYield,
+                  monthlyYieldPool,
+                  yieldPerToken,
+                  totalTokens,
                   distributedAt: new Date().toISOString(),
                 },
               },
@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
         }),
       });
 
-      const distResult = distRes.ok ? await distRes.json() : null;
+      const mintResult = mintRes.ok ? await mintRes.json() : null;
 
       results.push({
         propertyId: propId,
@@ -102,12 +102,13 @@ export async function POST(req: NextRequest) {
         annualYield,
         monthlyYieldPool,
         yieldPerToken,
-        actionId: distResult?.action_id || null,
-        status: distRes.ok ? 'distributed' : 'failed',
+        receiptId: mintResult?.steps?.[0]?.output?.ids?.[0] || null,
+        actionId: mintResult?.action_id || null,
+        status: mintRes.ok ? 'distributed' : 'failed',
       });
     }
 
-    const totalDistributed = results.reduce((sum, r) => sum + (r.status === 'distributed' ? r.monthlyYieldPool : 0), 0);
+    const totalDistributed = results.reduce((s, r) => s + (r.status === 'distributed' ? r.monthlyYieldPool : 0), 0);
 
     return NextResponse.json({
       success: true,

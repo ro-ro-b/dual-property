@@ -54,7 +54,14 @@ export async function GET(req: NextRequest) {
     }
 
     const data = await res.json();
-    const objects = data?.items || data?.objects || data?.data || (Array.isArray(data) ? data : []);
+    const allObjects = data?.items || data?.objects || data?.data || (Array.isArray(data) ? data : []);
+
+    // Filter out receipt tokens (yield receipts, distribution receipts, transfer intents)
+    const RECEIPT_TYPES = ['yield_receipt', 'distribution_receipt', 'transfer_intent'];
+    const objects = allObjects.filter((obj: any) => {
+      const customType = obj.custom?.type;
+      return !customType || !RECEIPT_TYPES.includes(customType);
+    });
 
     // Map gateway objects to property format
     // Note: custom fields may be flat (tokenPricePerShare) or nested (investment.tokenPricePerShare)
