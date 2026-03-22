@@ -4,14 +4,73 @@ import { getAuthenticatedClient } from "@/lib/dual-auth";
 
 export const dynamic = "force-dynamic";
 
+// Known fallback values (discovered during initial setup)
+const FALLBACK_TEMPLATE_ID = '69c057ffee7cf8d3342efec4';
+const FALLBACK_ORG_ID = '69b935b4187e903f826bbe71';
+
 // GET /api/properties — List all properties
-export async function GET() {
+// Uses direct HTTP to DUAL gateway with JWT from cookies for org-scoped access
+export async function GET(req: NextRequest) {
   try {
-    const provider = getDataProvider();
-    const properties = await provider.listProperties();
+    const BASE = process.env.NEXT_PUBLIC_DUAL_API_URL || 'https://gateway-48587430648.europe-west6.run.app';
+    const templateId = process.env.DUAL_PROPERTIES_TEMPLATE_ID || FALLBACK_TEMPLATE_ID;
+
+    // Try to get JWT from cookie for authenticated listing
+    const jwtCookie = req.cookies.get('dual_jwt')?.value;
+    const authHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (jwtCookie) {
+      authHeaders['Authorization'] = `Bearer ${jwtCookie}`;
+    } else if (process.env.DUAL_API_TOKEN) {
+      authHeaders['Authorization'] = `Bearer ${process.env.DUAL_API_TOKEN}`;
+    }
+
+    // Direct HTTP call to DUAL gateway — SDK client often lacks org context on serverless
+    const url = `${BASE}/objects?template_id=${templateId}&limit=100`;
+    const res = await fetch(url, { headers: authHeaders, cache: 'no-store' });
+
+    if (!res.ok) {
+      // If auth fails, fall back to data provider (which uses API key)
+      console.warn(`Direct objects fetch failed (${res.status}), falling back to data provider`);
+      const provider = getDataProvider();
+      const properties = await provider.listProperties();
+      return NextResponse.json({ properties });
+    }
+
+    const data = await res.json();
+    const objects = data?.items || data?.objects || data?.data || (Array.isArray(data) ? data : []);
+
+    // Map gateway objects to property format
+    const properties = objects.map((obj: any) => ({
+      id: obj.id || obj._id,
+      name: obj.custom?.name || obj.metadata?.name || obj.data?.name || `Property ${(obj.id || '').slice(-6)}`,
+      description: obj.custom?.description || obj.metadata?.description || obj.data?.description || '',
+      status: 'active',
+      propertyType: obj.custom?.propertyType || obj.data?.propertyType || 'residential',
+      location: {
+        address: obj.custom?.address || obj.data?.address || '',
+        city: obj.custom?.city || obj.data?.city || '',
+        country: obj.custom?.country || obj.data?.country || '',
+      },
+      investment: obj.custom?.investment || obj.data?.investment || {},
+      financials: obj.custom?.financials || obj.data?.financials || {},
+      templateId: obj.template_id,
+      ownerId: obj.owner_id || obj.owner,
+      blockchainTxHash: obj.integrity_hash,
+      createdAt: obj.created_at || obj.createdAt,
+      updatedAt: obj.updated_at || obj.updatedAt,
+    }));
+
     return NextResponse.json({ properties });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    console.error('Properties GET error:', err.message);
+    // Last resort fallback
+    try {
+      const provider = getDataProvider();
+      const properties = await provider.listProperties();
+      return NextResponse.json({ properties });
+    } catch {
+      return NextResponse.json({ properties: [], error: err.message }, { status: 200 });
+    }
   }
 }
 
@@ -51,7 +110,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    let templateId = body.templateId || process.env.DUAL_PROPERTIES_TEMPLATE_ID || cachedTemplateId || '';
+    let templateId = body.templateId || process.env.DUAL_PROPERTIES_TEMPLATE_ID || cachedTemplateId || FALLBACK_TEMPLATE_ID;
     const num = body.num || 1;
     const rawData = body.data || {};
 

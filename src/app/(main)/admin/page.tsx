@@ -285,7 +285,7 @@ export default function PropertyAdminPage() {
         steps.find(s => s.id === 'mint')!.status = 'error';
         setMintSteps([...steps]);
         setMintError(data.error || 'Mint failed');
-        if (res.status === 401) setAuthState('unauthenticated');
+        // Don't reset auth state on 401 — JWT may still be valid for other operations
         setSubmitting(false);
         return;
       }

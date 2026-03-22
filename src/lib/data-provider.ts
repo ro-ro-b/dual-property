@@ -536,7 +536,7 @@ class DualDataProvider implements DataProvider {
   async listProperties(): Promise<Property[]> {
     try {
       const client = getDualClient();
-      const templateId = process.env.DUAL_PROPERTIES_TEMPLATE_ID;
+      const templateId = process.env.DUAL_PROPERTIES_TEMPLATE_ID || '69c057ffee7cf8d3342efec4';
       const params: any = { limit: 100 };
       if (templateId) params.template_id = templateId;
       const response = await client.objects.listObjects(params);
