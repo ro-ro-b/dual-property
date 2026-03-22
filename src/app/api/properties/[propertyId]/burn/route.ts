@@ -7,8 +7,11 @@ export const dynamic = "force-dynamic";
 // Requires the owner's JWT (from session cookie) — API key alone can't burn
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { propertyId: string } }
+  context: { params: { propertyId: string } }
 ) {
+  // Await params in case Next.js treats them as async
+  const { propertyId } = await Promise.resolve(context.params);
+
   // Get the user's org-scoped JWT from cookie/header
   const jwtToken = await getOrgToken(req);
   if (!jwtToken) {
@@ -28,7 +31,7 @@ export async function DELETE(
       body: JSON.stringify({
         action: {
           burn: {
-            ids: [params.propertyId],
+            ids: [propertyId],
           },
         },
       }),
