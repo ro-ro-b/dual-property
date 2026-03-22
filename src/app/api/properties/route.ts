@@ -1,49 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDataProvider } from "@/lib/data-provider";
 import { getAuthenticatedClient } from "@/lib/dual-auth";
+import { getOrgToken, dualFetch } from "@/lib/get-org-token";
 
 export const dynamic = "force-dynamic";
 
 // Known fallback values (discovered during initial setup)
 const FALLBACK_TEMPLATE_ID = '69c057ffee7cf8d3342efec4';
-const FALLBACK_ORG_ID = '69b935b4187e903f826bbe71';
 
 // GET /api/properties — List all properties
-// Uses direct HTTP to DUAL gateway with JWT from cookies for org-scoped access
+// Uses shared getOrgToken helper for JWT with auto-refresh and org switching
 export async function GET(req: NextRequest) {
   try {
-    const BASE = process.env.NEXT_PUBLIC_DUAL_API_URL || 'https://gateway-48587430648.europe-west6.run.app';
     const templateId = process.env.DUAL_PROPERTIES_TEMPLATE_ID || FALLBACK_TEMPLATE_ID;
 
-    // Try to get JWT from cookie for authenticated listing
-    let jwtToken = req.cookies.get('dual_jwt')?.value || process.env.DUAL_API_TOKEN || '';
-    const orgId = process.env.DUAL_ORG_ID || FALLBACK_ORG_ID;
+    // Get org-scoped JWT (auto-refreshes expired tokens via refresh cookie)
+    const jwtToken = await getOrgToken(req);
 
-    // If we have a JWT, check if it's system-scoped and needs org switch
-    if (jwtToken) {
-      try {
-        const payload = JSON.parse(Buffer.from(jwtToken.split('.')[1], 'base64').toString());
-        if (payload.fqdn === 'system' && orgId) {
-          // System-scoped JWT — switch to org context
-          const switchRes = await fetch(`${BASE}/organizations/switch`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${jwtToken}` },
-            body: JSON.stringify({ id: orgId }),
-          });
-          if (switchRes.ok) {
-            const switchData = await switchRes.json();
-            jwtToken = switchData.access_token || jwtToken;
-          }
-        }
-      } catch { /* JWT parse error — use as-is */ }
+    if (!jwtToken) {
+      // No valid JWT — fall back to data provider
+      console.warn('No valid JWT available, falling back to data provider');
+      const provider = getDataProvider();
+      const properties = await provider.listProperties();
+      return NextResponse.json({ properties });
     }
 
-    const authHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (jwtToken) authHeaders['Authorization'] = `Bearer ${jwtToken}`;
-
-    // Direct HTTP call to DUAL gateway — SDK client often lacks org context on serverless
-    const url = `${BASE}/objects?template_id=${templateId}&limit=100`;
-    const res = await fetch(url, { headers: authHeaders, cache: 'no-store' });
+    // Direct HTTP call to DUAL gateway with org-scoped JWT
+    const res = await dualFetch(`/objects?template_id=${templateId}&limit=100`, jwtToken);
 
     if (!res.ok) {
       // If auth fails, fall back to data provider (which uses API key)

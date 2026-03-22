@@ -111,7 +111,6 @@ function PortfolioContent() {
   const avgYield = holdings.length > 0 ? holdings.reduce((sum, h) => sum + h.annualYield, 0) / holdings.length : 0;
 
   const handleClaimYield = async (propertyId: string) => {
-    console.log('[ClaimYield] clicked for', propertyId);
     setClaimingId(propertyId);
     try {
       const response = await fetch(`/api/properties/${propertyId}/claim-yield`, {
