@@ -2,6 +2,9 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import SearchBar from '@/components/SearchBar';
+import NotificationBell from '@/components/NotificationBell';
+import SupportWidget from '@/components/SupportWidget';
 
 export default function PropertyLayout({
   children,
@@ -41,7 +44,7 @@ export default function PropertyLayout({
             </Link>
 
             {/* Desktop Nav Links */}
-            <div className="hidden md:flex items-center gap-8">
+            <div className="hidden md:flex items-center gap-6">
               <Link
                 href="/"
                 className="text-sm font-medium text-white/70 hover:text-white transition-colors duration-200 relative group"
@@ -77,6 +80,12 @@ export default function PropertyLayout({
                 Admin
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-[#c9a84c] to-transparent group-hover:w-full transition-all duration-300" />
               </Link>
+
+              {/* Search + Notifications */}
+              <div className="flex items-center gap-2 ml-2 pl-4 border-l border-white/[0.06]">
+                <SearchBar />
+                <NotificationBell />
+              </div>
             </div>
 
             {/* Mobile Menu Button */}
@@ -128,6 +137,9 @@ export default function PropertyLayout({
 
       {/* Main Content */}
       <main className="relative z-0">{children}</main>
+
+      {/* Support Widget */}
+      <SupportWidget />
 
       {/* Footer */}
       <footer className="border-t border-white/[0.06] bg-[#0a0e1a] mt-20">

@@ -47,6 +47,8 @@ function PortfolioContent() {
   const [transferEmail, setTransferEmail] = useState('');
   const [transferring, setTransferring] = useState(false);
   const [chainActivity, setChainActivity] = useState<ChainActivity[]>([]);
+  const [wallet, setWallet] = useState<any>(null);
+  const [deposits, setDeposits] = useState<any[]>([]);
 
   useEffect(() => {
     // Fetch real properties as holdings
@@ -77,6 +79,22 @@ function PortfolioContent() {
       .then((r) => r.json())
       .then((data) => {
         setChainActivity(data.activity || []);
+      })
+      .catch(() => {});
+
+    // Fetch wallet info via WalletsModule
+    fetch('/api/wallet/me')
+      .then((r) => r.json())
+      .then((data) => { if (data.wallet) setWallet(data.wallet); })
+      .catch(() => {});
+
+    // Fetch deposits via PaymentsModule
+    fetch('/api/payments/deposits')
+      .then((r) => r.json())
+      .then((data) => {
+        const deps = Array.isArray(data.deposits) ? data.deposits :
+                     Array.isArray(data.deposits?.data) ? data.deposits.data : [];
+        setDeposits(deps);
       })
       .catch(() => {});
   }, []);
@@ -153,6 +171,32 @@ function PortfolioContent() {
           </p>
         </div>
       </div>
+
+      {/* Wallet Card */}
+      {wallet && (
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+          <div className="bg-gradient-to-r from-[#c9a84c]/10 to-[#a68832]/10 border border-[#c9a84c]/20 rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-[#c9a84c]/20 rounded-xl">
+                <span className="material-symbols-outlined text-[#c9a84c] text-2xl">account_balance_wallet</span>
+              </div>
+              <div>
+                <p className="text-xs text-white/50 uppercase tracking-wider">DUAL Wallet</p>
+                <p className="text-white font-mono text-sm mt-1">{wallet.address || wallet.id || 'Connected'}</p>
+                {wallet.balance !== undefined && (
+                  <p className="text-[#c9a84c] font-semibold mt-1">Balance: {typeof wallet.balance === 'object' ? JSON.stringify(wallet.balance) : wallet.balance}</p>
+                )}
+              </div>
+            </div>
+            {deposits.length > 0 && (
+              <div className="text-right">
+                <p className="text-xs text-white/50 uppercase tracking-wider">Deposits</p>
+                <p className="text-white font-semibold">{deposits.length} transaction{deposits.length !== 1 ? 's' : ''}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Portfolio Summary */}
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">

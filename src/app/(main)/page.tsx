@@ -35,6 +35,7 @@ export default function PropertiesPage() {
   const [sortBy, setSortBy] = useState<string>('recommended');
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
+  const [publicStats, setPublicStats] = useState<any>(null);
   const { connected, latestEvent } = useSSE();
 
   const fetchProperties = () => {
@@ -78,6 +79,11 @@ export default function PropertiesPage() {
 
   useEffect(() => {
     fetchProperties();
+    // Fetch public network stats via IndexerModule
+    fetch('/api/public/stats')
+      .then(r => r.json())
+      .then(data => { if (data.stats) setPublicStats(data.stats); })
+      .catch(() => {});
   }, []);
 
   // Refresh when new mint events arrive via SSE
@@ -169,7 +175,7 @@ export default function PropertiesPage() {
             { label: 'Total Portfolio Value', value: totalPortfolioValue > 0 ? `$${(totalPortfolioValue / 1000000).toFixed(1)}M` : '$0', icon: 'trending_up' },
             { label: 'Properties Listed', value: `${properties.length}`, icon: 'domain' },
             { label: 'Average Yield', value: averageYield > 0 ? `${averageYield.toFixed(1)}%` : '-', icon: 'show_chart' },
-            { label: 'On-Chain Assets', value: `${properties.length}`, icon: 'token' },
+            { label: 'Network Objects', value: publicStats?.totalObjects?.toLocaleString() || `${properties.length}`, icon: 'token' },
           ].map((stat, i) => (
             <div key={i} className="bg-white/[0.03] backdrop-blur-2xl border border-white/[0.06] rounded-2xl p-6 hover:border-[#c9a84c]/20 transition-all duration-300 group">
               <div className="flex items-start gap-3">

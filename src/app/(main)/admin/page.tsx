@@ -56,10 +56,15 @@ export default function PropertyAdminPage() {
     projectedAppreciation: 0,
   });
 
-  // Fetch org balance and templates when authenticated
+  // Fetch org balance, templates, and admin data when authenticated
   const [orgBalance, setOrgBalance] = useState<any>(null);
   const [templates, setTemplates] = useState<any[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
+  const [webhooks, setWebhooks] = useState<any[]>([]);
+  const [actionTypes, setActionTypes] = useState<any[]>([]);
+  const [batches, setBatches] = useState<any[]>([]);
+  const [faces, setFaces] = useState<any[]>([]);
+  const [paymentConfig, setPaymentConfig] = useState<any>(null);
 
   // Check auth on mount
   useEffect(() => {
@@ -91,6 +96,52 @@ export default function PropertyAdminPage() {
         setTemplates(tpls);
         if (tpls.length > 0) setSelectedTemplate(tpls[0].id);
       })
+      .catch(() => {});
+
+    // Fetch webhooks (WebhooksModule)
+    fetch('/api/webhooks/register')
+      .then(r => r.json())
+      .then(data => {
+        const wh = Array.isArray(data.webhooks) ? data.webhooks :
+                   Array.isArray(data.webhooks?.data) ? data.webhooks.data : [];
+        setWebhooks(wh);
+      })
+      .catch(() => {});
+
+    // Fetch action types (EbusModule)
+    fetch('/api/ebus/action-types')
+      .then(r => r.json())
+      .then(data => {
+        const at = Array.isArray(data.actionTypes) ? data.actionTypes :
+                   Array.isArray(data.actionTypes?.data) ? data.actionTypes.data : [];
+        setActionTypes(at);
+      })
+      .catch(() => {});
+
+    // Fetch batches (SequencerModule)
+    fetch('/api/sequencer/batches')
+      .then(r => r.json())
+      .then(data => {
+        const b = Array.isArray(data.batches) ? data.batches :
+                  Array.isArray(data.batches?.data) ? data.batches.data : [];
+        setBatches(b);
+      })
+      .catch(() => {});
+
+    // Fetch faces (FacesModule)
+    fetch('/api/faces')
+      .then(r => r.json())
+      .then(data => {
+        const f = Array.isArray(data.faces) ? data.faces :
+                  Array.isArray(data.faces?.data) ? data.faces.data : [];
+        setFaces(f);
+      })
+      .catch(() => {});
+
+    // Fetch payment config (PaymentsModule)
+    fetch('/api/payments/config')
+      .then(r => r.json())
+      .then(data => { if (data.config) setPaymentConfig(data.config); })
       .catch(() => {});
   }, [authState]);
 
@@ -494,7 +545,7 @@ export default function PropertyAdminPage() {
         </div>
 
         {/* Organization Dashboard */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-card-dark rounded-lg border border-gold-dim/20 p-6">
             <p className="text-gray-400 text-sm mb-1">Organization Balance</p>
             <p className="text-2xl font-bold text-white">{orgBalance ? JSON.stringify(orgBalance).slice(0, 30) : 'Loading...'}</p>
@@ -509,6 +560,35 @@ export default function PropertyAdminPage() {
               <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
               Connected
             </p>
+          </div>
+        </div>
+
+        {/* Extended DUAL Module Dashboard */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-12">
+          <div className="bg-card-dark rounded-lg border border-gold-dim/20 p-4">
+            <p className="text-gray-500 text-xs mb-1">Webhooks</p>
+            <p className="text-xl font-bold text-white">{webhooks.length}</p>
+            <p className="text-xs text-gray-500">Active listeners</p>
+          </div>
+          <div className="bg-card-dark rounded-lg border border-gold-dim/20 p-4">
+            <p className="text-gray-500 text-xs mb-1">Action Types</p>
+            <p className="text-xl font-bold text-white">{actionTypes.length}</p>
+            <p className="text-xs text-gray-500">Custom actions</p>
+          </div>
+          <div className="bg-card-dark rounded-lg border border-gold-dim/20 p-4">
+            <p className="text-gray-500 text-xs mb-1">Faces</p>
+            <p className="text-xl font-bold text-white">{faces.length}</p>
+            <p className="text-xs text-gray-500">Token media</p>
+          </div>
+          <div className="bg-card-dark rounded-lg border border-gold-dim/20 p-4">
+            <p className="text-gray-500 text-xs mb-1">Batches</p>
+            <p className="text-xl font-bold text-white">{batches.length}</p>
+            <p className="text-xs text-gray-500">Sequencer jobs</p>
+          </div>
+          <div className="bg-card-dark rounded-lg border border-gold-dim/20 p-4">
+            <p className="text-gray-500 text-xs mb-1">Payments</p>
+            <p className="text-xl font-bold text-white">{paymentConfig ? 'Active' : '-'}</p>
+            <p className="text-xs text-gray-500">Config status</p>
           </div>
         </div>
 
