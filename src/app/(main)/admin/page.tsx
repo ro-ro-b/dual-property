@@ -23,6 +23,7 @@ export default function PropertyAdminPage() {
   const [otp, setOtp] = useState('');
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
+  const [jwtToken, setJwtToken] = useState('');
 
   const [submitting, setSubmitting] = useState(false);
   const [mintPhase, setMintPhase] = useState<'form' | 'minting' | 'success'>('form');
@@ -187,6 +188,7 @@ export default function PropertyAdminPage() {
       const data = await res.json();
       if (res.ok) {
         setAuthState('authenticated');
+        if (data.token) setJwtToken(data.token);
       } else {
         setAuthError(data.error || 'Login failed');
       }
@@ -268,9 +270,12 @@ export default function PropertyAdminPage() {
         },
       };
 
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (jwtToken) headers['Authorization'] = `Bearer ${jwtToken}`;
+
       const res = await fetch('/api/properties', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ ...mintPayload, templateId: selectedTemplate || undefined }),
       });
       const data = await res.json();

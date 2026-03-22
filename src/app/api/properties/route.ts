@@ -21,7 +21,30 @@ let cachedTemplateId: string | null = null;
 // POST /api/properties — Mint a new property token
 export async function POST(req: NextRequest) {
   try {
-    const client = await getAuthenticatedClient();
+    // Try standard auth first, then fall back to Authorization header token
+    let client = await getAuthenticatedClient();
+
+    if (!client) {
+      // Fall back to token from Authorization header (client-side pass-through)
+      const authHeader = req.headers.get('authorization');
+      const headerToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+
+      // Also try cookie
+      const cookieToken = req.cookies.get('dual_jwt')?.value;
+      const token = headerToken || cookieToken;
+
+      if (token) {
+        const { DualClient } = await import('@/lib/dual-sdk');
+        client = new DualClient({
+          baseUrl: process.env.NEXT_PUBLIC_DUAL_API_URL || 'https://gateway-48587430648.europe-west6.run.app',
+          token,
+          apiKey: process.env.DUAL_API_KEY || '',
+          timeout: 30000,
+          retry: { maxAttempts: 2, backoffMs: 500 },
+        });
+      }
+    }
+
     if (!client) {
       return NextResponse.json(
         { error: "Not authenticated. Login first via /api/auth/otp and /api/auth/login." },

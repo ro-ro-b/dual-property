@@ -11,28 +11,29 @@ export async function POST(req: NextRequest) {
     }
     const tokens = await loginWithOtp(email, otp);
 
-    // Store JWT in HTTP-only cookie so it survives across serverless invocations
+    // Return JWT to client + set cookie for serverless persistence
     const response = NextResponse.json({
       success: true,
       message: "Authenticated with org context",
       expiresAt: tokens.expiresAt,
+      token: tokens.accessToken, // Client stores this for Authorization header
     });
 
     response.cookies.set('dual_jwt', tokens.accessToken, {
       httpOnly: true,
       secure: true,
-      sameSite: 'strict',
+      sameSite: 'lax',
       path: '/',
-      maxAge: 3600, // 1 hour
+      maxAge: 3600,
     });
 
     if (tokens.refreshToken) {
       response.cookies.set('dual_refresh', tokens.refreshToken, {
         httpOnly: true,
         secure: true,
-        sameSite: 'strict',
+        sameSite: 'lax',
         path: '/',
-        maxAge: 86400, // 24 hours
+        maxAge: 86400,
       });
     }
 
