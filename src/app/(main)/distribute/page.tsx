@@ -41,13 +41,16 @@ function DistributeContent() {
       .then((r) => r.json())
       .then((data) => {
         const props = data.properties || [];
-        const mapped: Property[] = props.map((p: any) => ({
-          id: p.id,
-          name: p.propertyData?.name || 'Property Token',
-          type: p.propertyData?.propertyType || 'residential',
-          totalTokens: p.propertyData?.totalTokens || 0,
-          tokenPrice: p.propertyData?.tokenPrice || 0,
-        }));
+        const mapped: Property[] = props.map((p: any) => {
+          const inv = p.investment || {};
+          return {
+            id: p.id,
+            name: p.name || 'Untitled Property',
+            type: p.propertyType || 'residential',
+            totalTokens: inv.totalTokens || 0,
+            tokenPrice: inv.tokenPricePerShare || 0,
+          };
+        });
         setProperties(mapped);
         if (mapped.length > 0) setSelectedProperty(mapped[0].id);
       })

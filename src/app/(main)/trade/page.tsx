@@ -42,18 +42,23 @@ export default function TradePage() {
       .then((r) => r.json())
       .then((data) => {
         const props = data.properties || [];
-        const mapped: PropertyListing[] = props.map((p: any) => ({
-          id: p.id,
-          name: p.propertyData?.name || 'Property Token',
-          type: p.propertyData?.propertyType === 'mixed-use' ? 'Mixed-Use' :
-            p.propertyData?.propertyType ? p.propertyData.propertyType.charAt(0).toUpperCase() + p.propertyData.propertyType.slice(1) : 'Residential',
-          tokenPrice: p.propertyData?.tokenPrice || 0,
-          totalValue: p.propertyData?.totalValue || 0,
-          totalTokens: p.propertyData?.totalTokens || 0,
-          tokensSold: p.propertyData?.tokensSold || 0,
-          annualYield: p.propertyData?.annualYield || 0,
-          location: p.propertyData?.city ? `${p.propertyData.city}, ${p.propertyData.country}` : 'DUAL Network',
-        }));
+        const mapped: PropertyListing[] = props.map((p: any) => {
+          const loc = p.location || {};
+          const inv = p.investment || {};
+          const rawType = p.propertyType || 'residential';
+          return {
+            id: p.id,
+            name: p.name || 'Untitled Property',
+            type: rawType === 'mixed-use' ? 'Mixed-Use' :
+              rawType.charAt(0).toUpperCase() + rawType.slice(1),
+            tokenPrice: inv.tokenPricePerShare || 0,
+            totalValue: inv.totalPropertyValue || 0,
+            totalTokens: inv.totalTokens || 0,
+            tokensSold: 0,
+            annualYield: inv.annualYield || 0,
+            location: loc.city ? `${loc.city}, ${loc.country || ''}`.replace(/, $/, '') : 'DUAL Network',
+          };
+        });
         setProperties(mapped);
       })
       .catch(() => {})

@@ -59,20 +59,18 @@ function PortfolioContent() {
       .then((data) => {
         const props = data.properties || [];
         const mapped: Holding[] = props.map((p: any, idx: number) => {
-          // Support both nested propertyData format and flat format from direct gateway mapping
-          const pd = p.propertyData || {};
           const inv = p.investment || {};
           const loc = p.location || {};
           return {
             id: p.id,
-            name: pd.name || p.name || 'Property Token',
-            location: (pd.city || loc.city) ? `${pd.city || loc.city}, ${pd.country || loc.country || ''}` : 'DUAL Network',
-            type: pd.propertyType || p.propertyType || 'residential',
-            tokenPrice: pd.tokenPrice || inv.tokenPricePerShare || 0,
-            totalValue: pd.totalValue || inv.totalPropertyValue || 0,
-            totalTokens: pd.totalTokens || inv.totalTokens || 0,
-            tokensSold: pd.tokensSold || 0,
-            annualYield: pd.annualYield || inv.annualYield || 0,
+            name: p.name || 'Untitled Property',
+            location: loc.city ? `${loc.city}, ${loc.country || ''}`.replace(/, $/, '') : 'DUAL Network',
+            type: p.propertyType || 'residential',
+            tokenPrice: inv.tokenPricePerShare || 0,
+            totalValue: inv.totalPropertyValue || 0,
+            totalTokens: inv.totalTokens || 0,
+            tokensSold: 0,
+            annualYield: inv.annualYield || 0,
             imageGradient: GRADIENTS[idx % GRADIENTS.length],
             imageUrl: p.imageUrl || '',
             blockchainTxHash: p.blockchainTxHash,
