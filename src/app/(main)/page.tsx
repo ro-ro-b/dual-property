@@ -307,6 +307,14 @@ export default function PropertiesPage() {
                           <span className="text-white/50">Total Value</span>
                           <span className="font-semibold text-white">{property.totalValue > 0 ? `$${(property.totalValue / 1000000).toFixed(1)}M` : 'On-Chain'}</span>
                         </div>
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-white/50">Token Price</span>
+                          <span className="font-semibold text-white">{property.tokenPrice > 0 ? `$${property.tokenPrice.toFixed(2)}` : '-'}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-white/50">Annual Yield</span>
+                          <span className="font-semibold text-[#10b981]">{property.yieldPercent > 0 ? `${property.yieldPercent}%` : '-'}</span>
+                        </div>
                       </div>
                       {property.fundedPercent > 0 && (
                         <div className="mb-6">
