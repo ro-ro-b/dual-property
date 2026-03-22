@@ -79,6 +79,7 @@ export default function PropertyAdminPage() {
       .then(r => r.json())
       .then(d => {
         setAuthState(d.authenticated ? 'authenticated' : 'unauthenticated');
+        if (d.token) setJwtToken(d.token);
       })
       .catch(() => setAuthState('unauthenticated'));
   }, []);
