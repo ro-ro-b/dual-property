@@ -120,6 +120,236 @@ export interface DataProvider {
   getDashboardStats(): Promise<DashboardStats>;
 }
 
+// ─── Seed Properties (Demo Data Fallback) ───
+
+const SEED_PROPERTIES: Property[] = [
+  {
+    id: 'seed-prop-001',
+    templateId: 'seed-template',
+    objectId: 'seed-prop-001',
+    contentHash: '',
+    propertyData: {
+      name: 'Manhattan Skyline Penthouse',
+      address: '217 West 57th Street',
+      city: 'New York',
+      country: 'USA',
+      propertyType: 'residential',
+      yearBuilt: 2021,
+      totalSqft: 8500,
+      units: 1,
+      totalValue: 45000000,
+      tokenPrice: 500,
+      totalTokens: 90000,
+      tokensSold: 0,
+      annualYield: 4.2,
+      minimumInvestment: 500,
+      description: 'Luxury penthouse with 360° Central Park views, private elevator, and smart home automation.',
+      features: [
+        '360° Central Park Views',
+        'Private Elevator',
+        'Infinity Lap Pool',
+        'Smart Home Automation',
+        'Wine Vault',
+        'Staff Quarters',
+      ],
+      financials: {
+        monthlyRentalIncome: 185000,
+        annualExpenses: 420000,
+        netOperatingIncome: 1800000,
+        capRate: 4.0,
+        projectedAppreciation: 5.8,
+      },
+      imageUrl: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600',
+    },
+    status: 'active',
+    ownerId: '0xDemo001',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    blockchainTxHash: undefined,
+    explorerLinks: undefined,
+  },
+  {
+    id: 'seed-prop-002',
+    templateId: 'seed-template',
+    objectId: 'seed-prop-002',
+    contentHash: '',
+    propertyData: {
+      name: 'Mayfair Georgian Townhouse',
+      address: '14 Charles Street',
+      city: 'London',
+      country: 'UK',
+      propertyType: 'residential',
+      yearBuilt: 1782,
+      totalSqft: 7200,
+      units: 1,
+      totalValue: 32000000,
+      tokenPrice: 250,
+      totalTokens: 128000,
+      tokensSold: 0,
+      annualYield: 3.8,
+      minimumInvestment: 250,
+      description: 'Grade II listed heritage townhouse with underground pool and private garden in prestigious Mayfair.',
+      features: [
+        'Grade II Listed Heritage',
+        'Underground Pool',
+        'Private Garden',
+        'Home Cinema',
+        'Wine Cellar',
+        'Two-Car Garage',
+      ],
+      financials: {
+        monthlyRentalIncome: 95000,
+        annualExpenses: 280000,
+        netOperatingIncome: 860000,
+        capRate: 2.7,
+        projectedAppreciation: 4.5,
+      },
+      imageUrl: 'https://images.unsplash.com/photo-1580898332518-c78ec338993d?w=600',
+    },
+    status: 'active',
+    ownerId: '0xDemo002',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    blockchainTxHash: undefined,
+    explorerLinks: undefined,
+  },
+  {
+    id: 'seed-prop-003',
+    templateId: 'seed-template',
+    objectId: 'seed-prop-003',
+    contentHash: '',
+    propertyData: {
+      name: 'Dubai Marina Skyreach Tower',
+      address: 'Plot JBR-7 Marina Promenade',
+      city: 'Dubai',
+      country: 'UAE',
+      propertyType: 'commercial',
+      yearBuilt: 2024,
+      totalSqft: 320000,
+      units: 1,
+      totalValue: 180000000,
+      tokenPrice: 1000,
+      totalTokens: 180000,
+      tokensSold: 0,
+      annualYield: 7.5,
+      minimumInvestment: 1000,
+      description: 'LEED Platinum commercial tower with Arabian Gulf views, metro link, and rooftop lounge.',
+      features: [
+        'LEED Platinum',
+        'Arabian Gulf Views',
+        'Metro Link',
+        'Smart Building AI',
+        'Rooftop Lounge',
+        'Retail Podium',
+      ],
+      financials: {
+        monthlyRentalIncome: 1250000,
+        annualExpenses: 3200000,
+        netOperatingIncome: 11800000,
+        capRate: 6.6,
+        projectedAppreciation: 8.2,
+      },
+      imageUrl: 'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600',
+    },
+    status: 'active',
+    ownerId: '0xDemo003',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    blockchainTxHash: undefined,
+    explorerLinks: undefined,
+  },
+  {
+    id: 'seed-prop-004',
+    templateId: 'seed-template',
+    objectId: 'seed-prop-004',
+    contentHash: '',
+    propertyData: {
+      name: 'Tokyo Shibuya Nexus',
+      address: '2-24-12 Shibuya',
+      city: 'Tokyo',
+      country: 'Japan',
+      propertyType: 'commercial',
+      yearBuilt: 2023,
+      totalSqft: 185000,
+      units: 1,
+      totalValue: 95000000,
+      tokenPrice: 750,
+      totalTokens: 126667,
+      tokensSold: 0,
+      annualYield: 5.1,
+      minimumInvestment: 750,
+      description: 'Modern commercial complex with seismic isolation, direct station link, and tech tenant anchor.',
+      features: [
+        'Seismic Isolation',
+        'Station Direct Link',
+        'Rooftop Zen Garden',
+        '99.2% Occupancy',
+        'Tech Tenant Anchored',
+        'Flexible Floors',
+      ],
+      financials: {
+        monthlyRentalIncome: 480000,
+        annualExpenses: 1100000,
+        netOperatingIncome: 4660000,
+        capRate: 4.9,
+        projectedAppreciation: 3.5,
+      },
+      imageUrl: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600',
+    },
+    status: 'active',
+    ownerId: '0xDemo004',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    blockchainTxHash: undefined,
+    explorerLinks: undefined,
+  },
+  {
+    id: 'seed-prop-005',
+    templateId: 'seed-template',
+    objectId: 'seed-prop-005',
+    contentHash: '',
+    propertyData: {
+      name: 'Sydney Harbour Cove Estate',
+      address: '8 Wunulla Road Point Piper',
+      city: 'Sydney',
+      country: 'Australia',
+      propertyType: 'residential',
+      yearBuilt: 2019,
+      totalSqft: 12000,
+      units: 1,
+      totalValue: 62000000,
+      tokenPrice: 400,
+      totalTokens: 155000,
+      tokensSold: 0,
+      annualYield: 3.2,
+      minimumInvestment: 400,
+      description: 'Waterfront estate with Opera House and Bridge views, deep-water jetty, and infinity pool.',
+      features: [
+        'Opera House & Bridge Views',
+        'Deep-Water Jetty',
+        'Infinity Pool',
+        'Guest Pavilion',
+        'Manicured Gardens',
+        'Triple Garage',
+      ],
+      financials: {
+        monthlyRentalIncome: 165000,
+        annualExpenses: 380000,
+        netOperatingIncome: 1600000,
+        capRate: 2.6,
+        projectedAppreciation: 6.1,
+      },
+      imageUrl: 'https://images.unsplash.com/photo-1449844908441-8829872d2607?w=600',
+    },
+    status: 'active',
+    ownerId: '0xDemo005',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    blockchainTxHash: undefined,
+    explorerLinks: undefined,
+  },
+];
+
 // ─── DUAL API Provider ───
 
 // Extract year from ISO timestamp
@@ -543,6 +773,11 @@ class DualDataProvider implements DataProvider {
       const objects = response?.items || response?.objects || (Array.isArray(response) ? response : []);
       const properties = objects.map(mapGatewayToProperty);
 
+      // Fallback to seed properties if DUAL returns empty results
+      if (properties.length === 0) {
+        return SEED_PROPERTIES;
+      }
+
       // Resolve Blockscout links for properties
       try {
         const ownerAddr = properties[0]?.ownerId;
@@ -566,7 +801,7 @@ class DualDataProvider implements DataProvider {
       return properties;
     } catch (err) {
       console.error('Failed to list properties:', err);
-      return [];
+      return SEED_PROPERTIES;
     }
   }
 
@@ -574,7 +809,10 @@ class DualDataProvider implements DataProvider {
     try {
       const client = getDualClient();
       const obj = await client.objects.getObject(id);
-      if (!obj) return null;
+      if (!obj) {
+        // Fallback to seed property if DUAL returns null
+        return SEED_PROPERTIES.find(p => p.id === id) || null;
+      }
       const property = mapGatewayToProperty(obj);
       // Resolve Blockscout links
       try {
@@ -594,7 +832,8 @@ class DualDataProvider implements DataProvider {
       } catch { /* Blockscout enrichment failed */ }
       return property;
     } catch {
-      return null;
+      // Fallback to seed property on error
+      return SEED_PROPERTIES.find(p => p.id === id) || null;
     }
   }
 }

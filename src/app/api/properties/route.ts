@@ -106,6 +106,15 @@ export async function GET(req: NextRequest) {
       };
     });
 
+    // If gateway returned no properties, fall back to seed data
+    if (properties.length === 0) {
+      const provider = getDataProvider();
+      const seedProperties = await provider.listProperties();
+      if (seedProperties.length > 0) {
+        return NextResponse.json({ properties: seedProperties });
+      }
+    }
+
     return NextResponse.json({ properties });
   } catch (err: any) {
     console.error('Properties GET error:', err.message);
