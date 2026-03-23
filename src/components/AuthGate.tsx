@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
+import { DualInline } from '@/app/(main)/DualLogo';
 
 interface AuthGateProps {
   children: React.ReactNode;
@@ -59,7 +60,7 @@ export default function AuthGate({ children, requireAuth = false, fallbackMessag
             </div>
             <h2 className="text-2xl font-serif italic font-bold text-white mb-2">Authentication Required</h2>
             <p className="text-sm text-white/60">
-              {fallbackMessage || 'Sign in with your DUAL account to access this page.'}
+              {fallbackMessage || <>Sign in with your <DualInline className="text-current" /> account to access this page.</>}
             </p>
           </div>
 

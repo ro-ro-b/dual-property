@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AuthGate from '@/components/AuthGate';
+import { DualInline } from '../DualLogo';
 
 interface Property {
   id: string;
@@ -146,7 +147,7 @@ function DistributeContent() {
             Yield<br />
             <span className="bg-gradient-to-r from-[#c9a84c] to-[#a68832] bg-clip-text text-transparent">Distribution Center</span>
           </h1>
-          <p className="text-lg text-white/60 max-w-lg">Execute batch yield distribution to all property token holders on the DUAL Network.</p>
+          <p className="text-lg text-white/60 max-w-lg">Execute batch yield distribution to all property token holders on the <DualInline className="text-current" /> Network.</p>
         </div>
       </div>
 

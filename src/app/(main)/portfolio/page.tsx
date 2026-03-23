@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import AuthGate from '@/components/AuthGate';
 import { useAuth } from '@/lib/auth-context';
+import { DualInline } from '../DualLogo';
 
 interface Holding {
   id: string;
@@ -202,7 +203,7 @@ function PortfolioContent() {
             <span className="bg-gradient-to-r from-[#c9a84c] to-[#a68832] bg-clip-text text-transparent">Portfolio</span>
           </h1>
           <p className="text-lg text-white/60 max-w-lg">
-            Track your investments and yield earnings across all DUAL properties.
+            Track your investments and yield earnings across all <DualInline className="text-current" /> properties.
             {user?.email && <span className="block text-sm text-[#c9a84c] mt-2">Signed in as {user.email}</span>}
           </p>
         </div>
@@ -217,7 +218,7 @@ function PortfolioContent() {
                 <span className="material-symbols-outlined text-[#c9a84c] text-2xl">account_balance_wallet</span>
               </div>
               <div>
-                <p className="text-xs text-white/50 uppercase tracking-wider">DUAL Wallet</p>
+                <p className="text-xs text-white/50 uppercase tracking-wider"><DualInline className="text-current" /> Wallet</p>
                 <p className="text-white font-mono text-sm mt-1">{wallet.address || wallet.id || 'Connected'}</p>
                 {wallet.balance !== undefined && (
                   <p className="text-[#c9a84c] font-semibold mt-1">Balance: {typeof wallet.balance === 'object' ? JSON.stringify(wallet.balance) : wallet.balance}</p>

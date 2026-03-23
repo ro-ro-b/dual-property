@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { DualInline } from '../../DualLogo';
 
 interface Property {
   id: string;
@@ -929,7 +930,7 @@ export default function PropertyDetailPage({
               <p className="text-white/70 mb-6">
                 {totalTokens > 0
                   ? `This property is tokenized into ${totalTokens.toLocaleString()} tokens on the DUAL Network, allowing fractional ownership. Each token represents an equal claim on property income and appreciation.`
-                  : 'This property is tokenized on the DUAL Network, allowing fractional ownership. Tokens can be traded on the DUAL platform or secondary markets.'}
+                  : <>This property is tokenized on the <DualInline className="text-current" /> Network, allowing fractional ownership. Tokens can be traded on the <DualInline className="text-current" /> platform or secondary markets.</>}
               </p>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {[
@@ -1158,7 +1159,7 @@ export default function PropertyDetailPage({
               <div className="text-center pt-4 border-t border-white/[0.06]">
                 <p className="text-xs text-white/50 flex items-center justify-center gap-1">
                   <span className="material-symbols-outlined text-sm">verified_user</span>
-                  Powered by DUAL Network
+                  Powered by <DualInline className="text-current" /> Network
                 </p>
               </div>
             </div>

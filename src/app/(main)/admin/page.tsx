@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { DualInline } from './DualLogo';
 
 type AuthState = 'checking' | 'unauthenticated' | 'otp_sent' | 'authenticated';
 
@@ -664,10 +665,10 @@ export default function PropertyAdminPage() {
             </span>
             <div>
               <h1 className="text-4xl font-bold text-white">List Property Token</h1>
-              <p className="text-gray-400 text-sm mt-1">DUAL Property Admin</p>
+              <p className="text-gray-400 text-sm mt-1"><DualInline className="text-current" /> Property Admin</p>
             </div>
           </div>
-          <p className="text-gray-400">Create and tokenize a new property on the DUAL Network.</p>
+          <p className="text-gray-400">Create and tokenize a new property on the <DualInline className="text-current" /> Network.</p>
         </div>
 
         {/* Organization Dashboard */}

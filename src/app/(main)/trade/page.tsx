@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { DualInline } from '../DualLogo';
 
 interface PropertyListing {
   id: string;
@@ -136,7 +137,7 @@ export default function TradePage() {
             Token<br />
             <span className="bg-gradient-to-r from-[#c9a84c] to-[#a68832] bg-clip-text text-transparent">Exchange</span>
           </h1>
-          <p className="text-lg text-white/60 max-w-lg">Buy and trade fractional property tokens on the DUAL Network.</p>
+          <p className="text-lg text-white/60 max-w-lg">Buy and trade fractional property tokens on the <DualInline className="text-current" /> Network.</p>
         </div>
       </div>
 

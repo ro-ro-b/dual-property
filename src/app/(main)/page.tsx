@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState, useMemo, useEffect } from 'react';
 import { useSSE } from '@/components/SSEProvider';
+import { DualInline } from './DualLogo';
 
 interface Property {
   id: string;
@@ -148,7 +149,7 @@ export default function PropertiesPage() {
             A Digital Prospectus.
           </p>
           <p className="text-sm text-white/50 max-w-2xl text-center">
-            Tokenized property investment on the DUAL Network. Access premium real estate with institutional-grade returns.
+            Tokenized property investment on the <DualInline className="text-current" /> Network. Access premium real estate with institutional-grade returns.
           </p>
         </div>
 
@@ -169,7 +170,7 @@ export default function PropertiesPage() {
             </div>
             <span className="text-white/70">
               propert{properties.length !== 1 ? 'ies' : 'y'} tokenized on{' '}
-              <span className="text-[#c9a84c] font-semibold">DUAL Network</span>
+              <span className="text-[#c9a84c] font-semibold"><DualInline className="text-current" /> Network</span>
             </span>
             {connected && (
               <span className="text-xs text-green-400 flex items-center gap-1">
@@ -276,7 +277,7 @@ export default function PropertiesPage() {
             </h2>
             <p className="text-white/60 max-w-md mx-auto mb-8">
               {properties.length === 0
-                ? 'Be the first to tokenize a property on the DUAL Network. Head to the Admin panel to mint your first property token.'
+                ? 'Be the first to tokenize a property on the <DualInline className="text-current" /> Network. Head to the Admin panel to mint your first property token.'
                 : 'Try adjusting your filters to see more properties.'}
             </p>
             {properties.length === 0 && (

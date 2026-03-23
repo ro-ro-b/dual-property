@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
+import { DualInline } from '@/app/(main)/DualLogo';
 
 export default function SupportWidget() {
   const { authState } = useAuth();
@@ -49,7 +50,7 @@ export default function SupportWidget() {
       {open && (
         <div className="fixed bottom-24 right-6 z-50 w-80 bg-[#111827] border border-white/[0.1] rounded-2xl shadow-2xl overflow-hidden">
           <div className="p-4 bg-gradient-to-r from-[#c9a84c]/20 to-[#a68832]/20 border-b border-white/[0.06]">
-            <h3 className="text-white font-semibold">DUAL Support</h3>
+            <h3 className="text-white font-semibold"><DualInline className="text-current" /> Support</h3>
             <p className="text-white/50 text-xs mt-1">How can we help?</p>
           </div>
 
