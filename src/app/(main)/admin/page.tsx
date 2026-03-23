@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { DualInline } from './DualLogo';
+import { DualInline } from '../DualLogo';
 
 type AuthState = 'checking' | 'unauthenticated' | 'otp_sent' | 'authenticated';
 
