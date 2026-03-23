@@ -5,6 +5,7 @@ import { useState } from 'react';
 import SearchBar from '@/components/SearchBar';
 import NotificationBell from '@/components/NotificationBell';
 import SupportWidget from '@/components/SupportWidget';
+import { DualLogo, DualInline } from './DualLogo';
 
 export default function PropertyLayout({
   children,
@@ -29,18 +30,9 @@ export default function PropertyLayout({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 bg-gradient-to-br from-[#c9a84c] to-[#a68832] rounded-xl flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300">
-                <span className="material-symbols-outlined text-[#0a0e1a] text-xl">
-                  domain
-                </span>
-              </div>
-              <div>
-                <h1 className="text-xl font-serif italic font-bold text-white">
-                  DUAL
-                </h1>
-                <p className="text-xs text-[#c9a84c] font-medium">Property</p>
-              </div>
+            <Link href="/" className="flex items-center gap-2.5 group">
+              <DualLogo height={22} className="text-white" />
+              <span className="text-sm font-medium text-gray-500">Property</span>
             </Link>
 
             {/* Desktop Nav Links */}
@@ -146,9 +138,10 @@ export default function PropertyLayout({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
-              <h3 className="text-sm font-serif italic text-white mb-4">
-                DUAL Property
-              </h3>
+              <div className="flex items-center gap-2 mb-4">
+                <DualLogo height={16} className="text-white" />
+                <span className="text-xs font-medium text-gray-500">Property</span>
+              </div>
               <p className="text-xs text-white/50">
                 Institutional real estate. Fractional access.
               </p>
@@ -195,7 +188,7 @@ export default function PropertyLayout({
           </div>
           <div className="border-t border-white/[0.06] pt-8">
             <p className="text-xs text-white/40 text-center">
-              © 2026 DUAL Property. All rights reserved. Powered by DUAL Network.
+              © 2026 <DualInline /> Property. All rights reserved. Powered by <DualInline /> Network.
             </p>
           </div>
         </div>
