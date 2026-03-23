@@ -124,22 +124,38 @@ export default function PropertiesPage() {
         .shimmer { background: linear-gradient(90deg, rgba(255,255,255,0.02) 25%, rgba(201,168,76,0.06) 50%, rgba(255,255,255,0.02) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
       `}</style>
 
-      {/* Hero Section */}
-      <div className="relative overflow-hidden pt-12 pb-20">
-        <div className="absolute inset-0 opacity-40">
-          <div className="absolute inset-0" style={{ backgroundImage: `radial-gradient(ellipse at 50% 0%, rgba(201, 168, 76, 0.1) 0%, transparent 60%)` }} />
-        </div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-5xl md:text-7xl font-serif italic font-bold text-white mb-6">
-            Institutional Real Estate.
-            <br />
-            <span className="bg-gradient-to-r from-[#c9a84c] to-[#a68832] bg-clip-text text-transparent">
-              Fractional Access.
-            </span>
+      {/* Full-Screen Hero Section */}
+      <div className="relative h-[80vh] w-full overflow-hidden -mt-20">
+        {/* Background Image */}
+        <img
+          src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1920&q=80"
+          alt="Luxury property"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        {/* Dark Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e1a] via-[#0a0e1a]/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0a0e1a]/40 to-transparent" />
+
+        {/* Centered Headline */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-10 px-4">
+          <h1 className="text-6xl md:text-8xl font-serif italic font-bold text-white text-center mb-4 max-w-5xl leading-tight">
+            INSTITUTIONAL REAL ESTATE.
           </h1>
-          <p className="text-lg md:text-xl text-white/60 max-w-2xl mx-auto">
+          <h2 className="text-5xl md:text-7xl font-serif italic font-bold text-[#c9a84c] text-center mb-8 max-w-4xl leading-tight">
+            FRACTIONAL ACCESS.
+          </h2>
+          <p className="text-lg md:text-xl font-serif italic text-white/80 mb-12">
+            A Digital Prospectus.
+          </p>
+          <p className="text-sm text-white/50 max-w-2xl text-center">
             Tokenized property investment on the DUAL Network. Access premium real estate with institutional-grade returns.
           </p>
+        </div>
+
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2">
+          <span className="text-xs uppercase tracking-widest text-white/40">Explore Properties</span>
+          <div className="w-px h-8 bg-gradient-to-b from-white/40 to-transparent animate-pulse" />
         </div>
       </div>
 
