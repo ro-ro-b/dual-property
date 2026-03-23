@@ -272,17 +272,38 @@ export default function PropertyDetailPage({
           </div>
         </div>
 
-        {/* Centered Headline */}
+        {/* Centered Property Name & Details */}
         <div className="absolute inset-0 flex flex-col items-center justify-center z-10 px-4">
-          <h1 className="text-6xl md:text-7xl font-serif italic font-bold text-white text-center mb-4 max-w-4xl leading-tight">
-            INSTITUTIONAL REAL ESTATE.
-          </h1>
-          <h2 className="text-5xl md:text-6xl font-serif italic font-bold text-[#c9a84c] text-center mb-8 max-w-4xl leading-tight">
-            FRACTIONAL ACCESS.
-          </h2>
-          <p className="text-lg md:text-xl font-serif italic text-white/80">
-            A Digital Prospectus.
+          <p className="text-sm uppercase tracking-[0.3em] text-[#c9a84c]/80 mb-6 font-sans">
+            {property.type} &middot; {typeof property.location === 'string' && property.location !== 'Location not specified' ? property.location : 'DUAL Network'}
           </p>
+          <h1 className="text-5xl md:text-7xl font-serif italic font-bold text-white text-center mb-6 max-w-5xl leading-tight">
+            {property.name}
+          </h1>
+          <div className="flex items-center gap-8 mt-4">
+            <div className="text-center">
+              <p className="text-xs uppercase tracking-wider text-white/50 mb-1">Token Price</p>
+              <p className="text-2xl font-serif italic font-bold text-[#c9a84c]">
+                ${property.tokenPrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+              </p>
+            </div>
+            <div className="w-px h-10 bg-white/20" />
+            <div className="text-center">
+              <p className="text-xs uppercase tracking-wider text-white/50 mb-1">Annual Yield</p>
+              <p className="text-2xl font-serif italic font-bold text-[#10b981]">
+                {property.yieldPercent.toFixed(1)}%
+              </p>
+            </div>
+            <div className="w-px h-10 bg-white/20" />
+            <div className="text-center">
+              <p className="text-xs uppercase tracking-wider text-white/50 mb-1">Valuation</p>
+              <p className="text-2xl font-serif italic font-bold text-white">
+                ${property.totalValue >= 1000000
+                  ? `${(property.totalValue / 1000000).toFixed(1)}M`
+                  : property.totalValue.toLocaleString()}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
