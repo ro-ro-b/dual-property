@@ -81,12 +81,40 @@ export async function GET(
       }
     }
 
-    // Fallback to data provider
+    // Fallback to data provider (seed data)
     const provider = getDataProvider();
-    const property = await provider.getProperty(params.propertyId);
-    if (!property) {
+    const raw = await provider.getProperty(params.propertyId);
+    if (!raw) {
       return NextResponse.json({ error: "Property not found" }, { status: 404 });
     }
+    // Map seed property (old propertyData format) to detail format
+    const pd = (raw as any).propertyData || {};
+    const fin = pd.financials || {};
+    const property = {
+      id: raw.id,
+      name: pd.name || 'Untitled Property',
+      description: pd.description || '',
+      location: [pd.address, pd.city, pd.country].filter(Boolean).join(', ') || 'DUAL Network',
+      type: pd.propertyType || 'residential',
+      totalValue: pd.totalValue || 0,
+      tokenPrice: pd.tokenPrice || 0,
+      yieldPercent: pd.annualYield || 0,
+      fundedPercent: 100,
+      sqft: pd.totalSqft || 0,
+      yearBuilt: pd.yearBuilt,
+      units: pd.units,
+      features: pd.features || [],
+      rentalIncome: fin.monthlyRentalIncome,
+      expenses: fin.annualExpenses,
+      capRate: fin.capRate,
+      projectedReturn: fin.projectedAppreciation,
+      imageUrl: pd.imageUrl || '',
+      videoUrl: pd.videoUrl || '',
+      contractAddress: '0x41Cf00E593c5623B00F812bC70Ee1A737C5aFF06',
+      integrityHash: (raw as any).contentHash,
+      ownerAddress: raw.ownerId,
+      tokenCount: pd.totalTokens || 1,
+    };
     return NextResponse.json({ property });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });

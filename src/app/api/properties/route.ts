@@ -8,6 +8,46 @@ export const dynamic = "force-dynamic";
 // Known fallback values (discovered during initial setup)
 const FALLBACK_TEMPLATE_ID = '69c057ffee7cf8d3342efec4';
 
+// Map seed/data-provider properties (old propertyData format) to gateway format
+function mapSeedProperties(seeds: any[]): any[] {
+  return seeds.map((s: any) => {
+    const pd = s.propertyData || {};
+    const fin = pd.financials || {};
+    return {
+      id: s.id,
+      name: pd.name || 'Untitled Property',
+      description: pd.description || '',
+      status: s.status || 'active',
+      propertyType: pd.propertyType || 'residential',
+      location: {
+        address: pd.address || '',
+        city: pd.city || '',
+        country: pd.country || '',
+      },
+      investment: {
+        totalPropertyValue: pd.totalValue || 0,
+        tokenPricePerShare: pd.tokenPrice || 0,
+        totalTokens: pd.totalTokens || 0,
+        annualYield: pd.annualYield || 0,
+        minimumInvestment: pd.minimumInvestment || 0,
+      },
+      financials: {
+        monthlyRentalIncome: fin.monthlyRentalIncome || 0,
+        annualExpenses: fin.annualExpenses || 0,
+        netOperatingIncome: fin.netOperatingIncome || 0,
+        capRate: fin.capRate || 0,
+        projectedAppreciation: fin.projectedAppreciation || 0,
+      },
+      imageUrl: pd.imageUrl || '',
+      videoUrl: pd.videoUrl || '',
+      templateId: s.templateId,
+      ownerId: s.ownerId,
+      createdAt: s.createdAt,
+      updatedAt: s.updatedAt,
+    };
+  });
+}
+
 // GET /api/properties — List all properties
 // Uses shared getOrgToken helper for JWT with auto-refresh and org switching
 export async function GET(req: NextRequest) {
@@ -111,7 +151,7 @@ export async function GET(req: NextRequest) {
       const provider = getDataProvider();
       const seedProperties = await provider.listProperties();
       if (seedProperties.length > 0) {
-        return NextResponse.json({ properties: seedProperties });
+        return NextResponse.json({ properties: mapSeedProperties(seedProperties) });
       }
     }
 
@@ -122,7 +162,7 @@ export async function GET(req: NextRequest) {
     try {
       const provider = getDataProvider();
       const properties = await provider.listProperties();
-      return NextResponse.json({ properties });
+      return NextResponse.json({ properties: mapSeedProperties(properties) });
     } catch {
       return NextResponse.json({ properties: [], error: err.message }, { status: 200 });
     }
